@@ -23,7 +23,7 @@
 /* Types */
 
 typedef struct inst_lookup_t {
-    const char instruction[MAX_INST_NAME_LEN];//Lowercase of instruction
+    const char str[MAX_INST_NAME_LEN];//Lowercase of instruction
     union
     {
         uint8_t raw_instruction_byte;
@@ -55,58 +55,58 @@ typedef struct inst_t {
 
 static const inst_lookup_t inst_lookup_table [NUM_INSTRUCTIONS] = {
     //Type 3
-    {.instruction = "page",                 .opcode = 0b000000, .type = 3},
-    {.instruction = "sjump",                .opcode = 0b000001, .type = 3},
-    {.instruction = "slt",                  .opcode = 0b000010, .type = 3},
-    {.instruction = "seq",                  .opcode = 0b000011, .type = 3},
-    {.instruction = "sgt",                  .opcode = 0b000100, .type = 3},
-    {.instruction = "fill",                 .opcode = 0b000101, .type = 3},
-    {.instruction = "point",                .opcode = 0b000110, .type = 3},
-    {.instruction = "line",                 .opcode = 0b000111, .type = 3},
-    {.instruction = "wait",                 .opcode = 0b001000, .type = 3},
-    {.instruction = "scall",                .opcode = 0b001001, .type = 3},
-    {.instruction = "pollin",               .opcode = 0b001010, .type = 3},
+    {.str = "page",                 .opcode = 0b000000, .type = 3},
+    {.str = "sjump",                .opcode = 0b000001, .type = 3},
+    {.str = "slt",                  .opcode = 0b000010, .type = 3},
+    {.str = "seq",                  .opcode = 0b000011, .type = 3},
+    {.str = "sgt",                  .opcode = 0b000100, .type = 3},
+    {.str = "fill",                 .opcode = 0b000101, .type = 3},
+    {.str = "point",                .opcode = 0b000110, .type = 3},
+    {.str = "line",                 .opcode = 0b000111, .type = 3},
+    {.str = "wait",                 .opcode = 0b001000, .type = 3},
+    {.str = "scall",                .opcode = 0b001001, .type = 3},
+    {.str = "pollin",               .opcode = 0b001010, .type = 3},
 
-    {.instruction = "0tox",                 .opcode = 0b100000, .type = 3},
-    {.instruction = "xto0",                 .opcode = 0b100001, .type = 3},
+    {.str = "0tox",                 .opcode = 0b100000, .type = 3},
+    {.str = "xto0",                 .opcode = 0b100001, .type = 3},
 
     //Type 2
-    {.instruction = "lim",                  .opcode = 0b000,    .type = 2},
-    {.instruction = "char",                 .opcode = 0b001,    .type = 2},
-    {.instruction = "load",                 .opcode = 0b010,    .type = 2},
-    {.instruction = "store",                .opcode = 0b011,    .type = 2},
-    {.instruction = "sl",                   .opcode = 0b100,    .type = 2},
-    {.instruction = "sr",                   .opcode = 0b101,    .type = 2},
+    {.str = "lim",                  .opcode = 0b000,    .type = 2},
+    {.str = "char",                 .opcode = 0b001,    .type = 2},
+    {.str = "load",                 .opcode = 0b010,    .type = 2},
+    {.str = "store",                .opcode = 0b011,    .type = 2},
+    {.str = "sl",                   .opcode = 0b100,    .type = 2},
+    {.str = "sr",                   .opcode = 0b101,    .type = 2},
 
     //Type 1
-    {.instruction = "push",                 .opcode = 0b000,    .type = 1},
-    {.instruction = "pop",                  .opcode = 0b001,    .type = 1},
-    {.instruction = "add",                  .opcode = 0b010,    .type = 1},
-    {.instruction = "sub",                  .opcode = 0b011,    .type = 1},
-    {.instruction = "and",                  .opcode = 0b100,    .type = 1},
-    {.instruction = "or",                   .opcode = 0b101,    .type = 1},
-    {.instruction = "xor",                  .opcode = 0b110,    .type = 1},
-    {.instruction = "mul",                  .opcode = 0b111,    .type = 1},
+    {.str = "push",                 .opcode = 0b000,    .type = 1},
+    {.str = "pop",                  .opcode = 0b001,    .type = 1},
+    {.str = "add",                  .opcode = 0b010,    .type = 1},
+    {.str = "sub",                  .opcode = 0b011,    .type = 1},
+    {.str = "and",                  .opcode = 0b100,    .type = 1},
+    {.str = "or",                   .opcode = 0b101,    .type = 1},
+    {.str = "xor",                  .opcode = 0b110,    .type = 1},
+    {.str = "mul",                  .opcode = 0b111,    .type = 1},
 
     //Type 0
-    {.instruction = "nop",                  .opcode = 0b000000, .type = 0},
-    {.instruction = "envga",                .opcode = 0b000001, .type = 0},
-    {.instruction = "tone",                 .opcode = 0b000010, .type = 0},
-    {.instruction = "notone",               .opcode = 0b000011, .type = 0},
-    {.instruction = "jump",                 .opcode = 0b000100, .type = 0},
-    {.instruction = "jlt",                  .opcode = 0b000101, .type = 0},
-    {.instruction = "jeq",                  .opcode = 0b000110, .type = 0},
-    {.instruction = "jgt",                  .opcode = 0b000111, .type = 0},
-    {.instruction = "lcall",                .opcode = 0b001000, .type = 0},
-    {.instruction = "logo",                 .opcode = 0b001001, .type = 0},
-    {.instruction = "pollblank",            .opcode = 0b001010, .type = 0},
-    {.instruction = "pollrenderbusy",       .opcode = 0b001011, .type = 0},
-    {.instruction = "ret",                  .opcode = 0b001100, .type = 0},
-    {.instruction = "jbez",                 .opcode = 0b001101, .type = 0},
-    {.instruction = "jbnez",                .opcode = 0b001110, .type = 0},
+    {.str = "nop",                  .opcode = 0b000000, .type = 0},
+    {.str = "envga",                .opcode = 0b000001, .type = 0},
+    {.str = "tone",                 .opcode = 0b000010, .type = 0},
+    {.str = "notone",               .opcode = 0b000011, .type = 0},
+    {.str = "jump",                 .opcode = 0b000100, .type = 0},
+    {.str = "jlt",                  .opcode = 0b000101, .type = 0},
+    {.str = "jeq",                  .opcode = 0b000110, .type = 0},
+    {.str = "jgt",                  .opcode = 0b000111, .type = 0},
+    {.str = "lcall",                .opcode = 0b001000, .type = 0},
+    {.str = "logo",                 .opcode = 0b001001, .type = 0},
+    {.str = "pollblank",            .opcode = 0b001010, .type = 0},
+    {.str = "pollrenderbusy",       .opcode = 0b001011, .type = 0},
+    {.str = "ret",                  .opcode = 0b001100, .type = 0},
+    {.str = "jbez",                 .opcode = 0b001101, .type = 0},
+    {.str = "jbnez",                .opcode = 0b001110, .type = 0},
 
-    {.instruction = "halt",                 .opcode = 0b111110, .type = 0},
-    {.instruction = "reset",                .opcode = 0b111111, .type = 0}
+    {.str = "halt",                 .opcode = 0b111110, .type = 0},
+    {.str = "reset",                .opcode = 0b111111, .type = 0}
 };
 
 /* Macros */
@@ -120,7 +120,7 @@ static const inst_lookup_t inst_lookup_table [NUM_INSTRUCTIONS] = {
 /* Static Function Declarations */
 
 static bool assemble_into_memory_image(char* file_data, uint8_t* memory_image);
-static bool parse_instruction_line(const char* line, inst_t* instruction);
+static bool parse_instruction_line(char* line, inst_t* instruction);
 static const inst_lookup_t* get_raw_instruction(const char* line);
 static size_t get_file_size(FILE* file);
 
@@ -172,6 +172,8 @@ int main(int argc, const char** argv) {
     //compile time and even if we use alloca the file size could
     //blow past the amount of stack we have available
     uint8_t memory_image[MAIN_MEMORY_SIZE];
+    //By default, fill memory with HALT instructions to make the user's debugging easier
+    memset(memory_image, 0b11111100, MAIN_MEMORY_SIZE);
 
     //Perform the actual assembly and write to the memory_image buffer
     if (!assemble_into_memory_image(input_file_data, memory_image)) {//Parse failed
@@ -207,12 +209,17 @@ static bool assemble_into_memory_image(char* file_data, uint8_t* memory_image) {
     assert(file_data);
     assert(memory_image);
 
-    const char* line = strtok(file_data, "\n");
-    size_t current_line = 1;
-
+    size_t current_line = 0;
     size_t memory_image_index = 0;
 
-    while (line) {
+    char* line_end;
+    while ((line_end = strchr(file_data, '\n'))) {
+        //Cut off the line we're looking at from the rest of the file data
+        *line_end = '\0';
+        char* line = file_data;
+        file_data = line_end + 1;
+        ++current_line;
+
         debug_print("Line %lu: \"%s\"", current_line, line);
 
         //Skip past leading whitespace
@@ -222,24 +229,30 @@ static bool assemble_into_memory_image(char* file_data, uint8_t* memory_image) {
         debug_print("Whitespace removed: \"%s\"", line);
 
         //Go to the next line if this one was empty
-        //FIXME strtok seems to skip over this case, but we want to deal with it seperately
         if (!(*line)) {
             debug_print("Empty line, skipping");
-            line = strtok(NULL, "\n");//Get the next line
-            ++current_line;
             continue;
         }
 
+        //Skip comments (note: we ONLY support comments on their own line (not after instructions))
         if (*line == '/') {
-            if (*(line + 1) == '/') {//We are not out of bounds since the prev char was not null
+            //Note: We are not out of bounds since the prev char was not null
+            if (*(line + 1) == '/') {
                 debug_print("Comment, skipping");
-                line = strtok(NULL, "\n");//Get the next line
-                ++current_line;
                 continue;//Skip this line (it is a comment)continue;
             }
-        }
 
-        //TODO multi-line comments
+            //TODO perhaps support multi-line comments in the future?
+            /*
+            if (*(line + 1) == '*') {
+                debug_print("Multi-line comment, skipping starts");
+
+                //TODO implement
+                fprintf("Error: Not implemented");
+                return false;
+            }
+            */
+        }
 
         //TODO what about symbol support, support for assembler comands (ex. string/numerical literals, etc)
         //We will probably need an intermediate representation (array of decoded instructions) to perform
@@ -258,78 +271,77 @@ static bool assemble_into_memory_image(char* file_data, uint8_t* memory_image) {
             return false;
         }
 
-        debug_print("Writing 1st instruction byte %x to index %lu", instruction.instruction_byte, memory_image_index);
+        debug_print("Writing 1st instruction byte 0x%.2x to index 0x%.4lx", instruction.instruction_byte, memory_image_index);
         memory_image[memory_image_index] = instruction.instruction_byte;
-        ++memory_image;
+        ++memory_image_index;
         if (instruction.type >= 2) {
-            debug_print("Writing 2nd instruction byte %x to index %lu", instruction.second_byte, memory_image_index);
-            *memory_image = instruction.second_byte;
-            ++memory_image;
+            debug_print("Writing 2nd instruction byte 0x%.2x to index 0x%.4lx", instruction.second_byte, memory_image_index);
+            memory_image[memory_image_index] = instruction.second_byte;
+            ++memory_image_index;
         }
-
-        line = strtok(NULL, "\n");//Get the next line
-        ++current_line;
     }
+
+    return true;//We did it!
 }
 
-static bool parse_instruction_line(const char* line, inst_t* instruction) {
+static bool parse_instruction_line(char* line, inst_t* instruction) {
     assert(line);
+    assert(instruction);
 
-    //Assume leading whitespace has been cut off, so we can just call this right away
+    //Assume leading whitespace has been cut off
+    //Cut off the instruction itself from the rest of the line and parse it
+    char* inst_str_end = strpbrk(line, "\n\t ");
+    if (inst_str_end)
+        *inst_str_end = '\0';
+    debug_print("Parsing instruction name \"%s\"", line);
     const inst_lookup_t* raw_inst = get_raw_instruction(line);
-    if (!raw_inst)//Lookup failed
+    if (!raw_inst) {//Lookup failed
+        debug_print("Instruction name lookup failed");
         return false;
+    }
+
+    //Change line to point to the rest of the line now
+    if (inst_str_end) {
+        line = inst_str_end + 1;
+        debug_print("Remainder of line contains: \"%s\"", line);
+    } else {
+        line = NULL;
+        debug_print("Line is now empty");
+    }
 
     instruction->instruction_byte = raw_inst->raw_instruction_byte;
 
     switch (raw_inst->type) {
         case 3:
             //Need to parse the line for things to put into the second byte
+            debug_print("Instruction is type 3, parsing immediate");
             assert(false);//TODO implement
         case 2:
             //Need to parse the line for things to put into the second byte
             //as well as the operand
+            debug_print("Instruction is type 2, parsing operand and immediate");
             assert(false);//TODO implement
         case 1:
             //Need to parse the line for the operand
+            debug_print("Instruction is type 1, parsing operand");
             assert(false);//TODO implement
         case 0:
+            debug_print("Instruction is type 0, no additional steps");
             return true;//Nothing else to parse!
         default:
+            debug_print("Instruction is invalid type, this shouldn't occur");
             assert(false);//This shouldn't occur
-
     }
 }
 
-static const inst_lookup_t* get_raw_instruction(const char* line) {
-    assert(line);
+static const inst_lookup_t* get_raw_instruction(const char* inst_str) {
+    assert(inst_str);
 
     //Assume string has no leading whitespace and is null terminated properly
     //Since the instruction lookup table isn't sorted alphabetically, really all we have is a linear search
-    for (size_t i = 0; i < NUM_INSTRUCTIONS; ++i) {
-        const char* comparison_str = inst_lookup_table[i].instruction;
-
-        bool found = false;
-        for (size_t j = 0; j < MAX_INST_NAME_LEN; ++j) {
-            //Assume the line won't end before we recognize it either does or dosn't match
-            assert(line[i]);
-            assert(j < strlen(line));
-
-            //Check if this character is the same
-            if (line[i] != comparison_str[i]) {
-                //If we the character mismatch was because the comparison_str ended
-                //and the line string encountered white space (aka the instruction ended)
-                if ((!(comparison_str[i])) && isspace(line[i])) {
-                    found = true;//Then we did it! Both instructions matched!
-                    break;
-                } else
-                    continue;//Try again
-            }
-        }
-
-        if (found)
+    for (size_t i = 0; i < NUM_INSTRUCTIONS; ++i)
+        if (!strcmp(inst_lookup_table[i].str, inst_str))
             return &inst_lookup_table[i];
-    }
 
     return NULL;//If we couldn't find the instruction
 }
