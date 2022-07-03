@@ -128,5 +128,7 @@ May add more instructions (particularly more rendering instructions) in the futu
 [001100] | RET              | Pop 2 bytes from the stack containing the address to return to
 [001101] | JBEZ             | Jump back to the previous instruction is r0 = 0 (useful for polling)
 [001110] | JBNEZ            | Jump back to the previous instruction is r0 != 0 (useful for polling)
-[111111] | RESET            | Reset the system
+
+
 [111110] | HALT             | Spin forever
+[111111] | RESET            | Reset the system
