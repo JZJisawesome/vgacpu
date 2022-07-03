@@ -48,8 +48,8 @@ r2: gp register
 r3: gp register
 r4: x0 coordinate register (for FB access); low tone byte
 r5: y0 coordinate register (for FB access); high tone byte
-r6: x1 coordinate register (for FB access); low address register
-r7: y1 coordinate register (for FB access); high address register
+r6: x1 coordinate register (for FB access); low extended address register
+r7: y1 coordinate register (for FB access); high extended address register
 In addition, 3 other registers:
 sp: Stack pointer (starts at end of address space) 14 bits
 pc: Program counter (starts at start of address space) 14 bits
