@@ -2,7 +2,6 @@
  * By: John Jekel
  *
  * Takes a single input file and outputs a .bin file (ram image) for the vgacpu
- *
 */
 
 /* Constants And Defines */
@@ -16,6 +15,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdbool.h>
+#include <string.h>
+#include <ctype.h>
 
 /* Types */
 
@@ -91,7 +93,7 @@ static const string_opcode_lookup_group string_opcode_lookup [NUM_INSTRUCTIONS] 
 
 /* Static Function Declarations */
 
-static void assemble_into_memory_image(const char* file_data, uint8_t* memory_image);
+static bool assemble_into_memory_image(char* file_data, uint8_t* memory_image);
 static const string_opcode_lookup_group* parse_instruction_line(const char* line);
 static size_t get_file_size(FILE* file);
 
@@ -122,7 +124,12 @@ int main(int argc, const char** argv) {
         fclose(input_file);
         return 1;
     }
-    fread(input_file_data, sizeof(char), input_file_size, input_file);
+    if (fread(input_file_data, sizeof(char), input_file_size, input_file) < input_file_size) {
+        fputs("Error: Failed to read entirety of input.\n", stderr);
+        fclose(input_file);
+        free(input_file_data);
+        return 1;
+    }
     fclose(input_file);//We're done with the file now
 
     //Cheaper to just keep this on the stack than malloc and free things :)
@@ -132,17 +139,23 @@ int main(int argc, const char** argv) {
     uint8_t memory_image[MAIN_MEMORY_SIZE];
 
     //Perform the actual assembly and write to the memory_image buffer
-    assemble_into_memory_image(input_file_data, memory_image);
+    if (!assemble_into_memory_image(input_file_data, memory_image)) {//Parse failed
+        free(input_file_data);
+        return 1;
+    }
     free(input_file_data);//No more need for this
 
     //Write the memory image out as a binary file and close it
     FILE* output_file = fopen(argv[2], "wb");
     if (!output_file) {
         fprintf(stderr, "Error: Failed to open %s for writing.\n", argv[2]);
-        fclose(input_file);
         return 1;
     }
-    fwrite(memory_image, sizeof(uint8_t), MAIN_MEMORY_SIZE, output_file);
+    if (fwrite(memory_image, sizeof(uint8_t), MAIN_MEMORY_SIZE, output_file) < MAIN_MEMORY_SIZE) {
+        fputs("Error: Failed to write entirety of output.\n", stderr);
+        fclose(output_file);
+        return 1;
+    }
     fclose(output_file);
 
     //We're done!
@@ -152,15 +165,47 @@ int main(int argc, const char** argv) {
 
 /* Static Function Implementations */
 
-static void assemble_into_memory_image(const char* file_data, uint8_t* memory_image) {
+static bool assemble_into_memory_image(char* file_data, uint8_t* memory_image) {
     assert(file_data);
     assert(memory_image);
-    //TODO implement
+
+    assert(false);//TODO implement
+
+    const char* line = strtok(file_data, "\n");
+    size_t current_line = 1;
+
+    while (line) {
+        //Skip past leading whitespace
+        while (isspace(*line))
+            ++line;
+
+        //Go to the next line if this one was empty
+        if (!(*line))
+            continue;
+
+        if (*line == '/')
+            if (*(line + 1) == '/')//We are not out of bounds since the prev char was not null
+                continue;//Skip this line (it is a comment)
+
+        //TODO multi-line comments
+
+        //Parse the instruction on this line
+        const string_opcode_lookup_group* instruction = parse_instruction_line(line);
+        if (!instruction) {//Parse failed
+            fprintf(stderr, "Syntax error on line %lu.\n", current_line);
+            return false;
+        }
+        //TODO write instruction to memory image
+
+        line = strtok(NULL, "\n");//Get the next line
+        ++current_line;
+    }
 }
 
 static const string_opcode_lookup_group* parse_instruction_line(const char* line) {
     assert(line);
-    //TODO implement
+
+    assert(false);//TODO implement
 }
 
 static size_t get_file_size(FILE* file) {
