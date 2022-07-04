@@ -28,8 +28,8 @@ typedef struct inst_lookup_t {
     {
         uint8_t raw_instruction_byte;
         struct {
-            uint8_t opcode : 6;//Opcodes are at most 6 bits depending on type
             uint8_t type : 2;//2 bits to indicate opcode type
+            uint8_t opcode : 6;//Opcodes are at most 6 bits depending on type
         };
     };
 } inst_lookup_t;
@@ -39,11 +39,17 @@ typedef struct inst_t {
     {
         uint8_t instruction_byte;
         struct {
-            uint8_t opcode : 6;//Opcodes are at most 6 bits depending on type
             uint8_t type : 2;//2 bits to indicate opcode type
+            uint8_t opcode : 6;//Opcodes are at most 6 bits depending on type
+            /*union {
+                uint8_t opcode : 6;//Opcodes are at most 6 bits depending on type
+                struct {
+                    uint8_t opcode_3 : 3;
+                    uint8_t operand : 3;
+                };
+            };*/
         };
     };
-    uint8_t operand : 3;
     union {
         uint8_t second_byte;
         uint8_t immediate;
@@ -226,8 +232,6 @@ static bool assemble_into_memory_image(char* file_data, uint8_t* memory_image) {
         while (isspace(*line) && (*line))
             ++line;
 
-        debug_print("Whitespace removed: \"%s\"", line);
-
         //Go to the next line if this one was empty
         if (!(*line)) {
             debug_print("Empty line, skipping");
@@ -303,7 +307,17 @@ static bool parse_instruction_line(char* line, inst_t* instruction) {
     //Change line to point to the rest of the line now
     if (inst_str_end) {
         line = inst_str_end + 1;
-        debug_print("Remainder of line contains: \"%s\"", line);
+
+        //Skip past leading whitespace
+        while (isspace(*line) && (*line))
+            ++line;
+
+        if (*line)
+            debug_print("Remainder of line contains: \"%s\"", line);
+        else {
+            line = NULL;
+            debug_print("Line is now empty");
+        }
     } else {
         line = NULL;
         debug_print("Line is now empty");
@@ -312,25 +326,96 @@ static bool parse_instruction_line(char* line, inst_t* instruction) {
     instruction->instruction_byte = raw_inst->raw_instruction_byte;
 
     switch (raw_inst->type) {
-        case 3:
+        case 3: {//inst IMM
             //Need to parse the line for things to put into the second byte
             debug_print("Instruction is type 3, parsing immediate");
-            assert(false);//TODO implement
-        case 2:
+
+            if (!line) {
+                debug_print("Unexpected end of line");
+                return false;
+            }
+
+            //TODO ensure no garbage afterwards/before and that atoi parse was sucessful; also support bin and hex input
+            instruction->second_byte = strtol(line, NULL, 0);
+            debug_print("Immediate is 0x%.2x", instruction->second_byte);
+
+            return true;
+        } case 2: {//inst rX, IMM
             //Need to parse the line for things to put into the second byte
             //as well as the operand
             debug_print("Instruction is type 2, parsing operand and immediate");
-            assert(false);//TODO implement
-        case 1:
+
+            if (!line) {
+                debug_print("Unexpected end of line");
+                return false;
+            }
+
+            if ((*line) != 'r') {
+                debug_print("Register name not prefixed with r");
+                return false;
+            }
+            ++line;
+
+            char* end_of_operand;
+            uint8_t operand = strtol(line, &end_of_operand, 10);//TODO ensure no garbage afterwards/before and that atoi parse was sucessful
+            line = end_of_operand;//More the line past the parsed operand
+            debug_print("Operand is r%u", operand);
+
+            //Overwrite upper 3 bits of instruction byte with the operand
+            //Assume upper 3 bits are 0 (opcodes should only go up to 0b111
+            //in type 2 so this assumption should be safe)
+            instruction->instruction_byte |= operand << 5;
+
+            //Skip past leading whitespace
+            while (isspace(*line) && (*line))
+                ++line;
+
+            if ((*line) != ',') {
+                debug_print("Register name not followed by comma");
+                return false;
+            }
+            ++line;
+
+            //TODO ensure no garbage afterwards/before and that atoi parse was sucessful; also support bin and hex input
+            instruction->second_byte = strtol(line, NULL, 0);
+            debug_print("Immediate is 0x%.2x", instruction->second_byte);
+
+            return true;
+        } case 1: {//inst rX
             //Need to parse the line for the operand
             debug_print("Instruction is type 1, parsing operand");
-            assert(false);//TODO implement
-        case 0:
+
+            if (!line) {
+                debug_print("Unexpected end of line");
+                return false;
+            }
+
+            if ((*line) != 'r') {
+                debug_print("Register name not prefixed with r");
+                return false;
+            }
+            ++line;
+
+            uint8_t operand = atoi(line);//TODO ensure no garbage afterwards/before and that atoi parse was sucessful
+            debug_print("Operand is r%u", operand);
+
+            //Overwrite upper 3 bits of instruction byte with the operand
+            //Assume upper 3 bits are 0 (opcodes should only go up to 0b111
+            //in type 1 so this assumption should be safe)
+            instruction->instruction_byte |= operand << 5;
+
+            return true;
+        } case 0: {//inst
             debug_print("Instruction is type 0, no additional steps");
+            if (line) {
+                debug_print("User left unexpected characters after the instruction");
+                return false;
+            }
             return true;//Nothing else to parse!
-        default:
+        } default: {
             debug_print("Instruction is invalid type, this shouldn't occur");
             assert(false);//This shouldn't occur
+        }
     }
 }
 
