@@ -1,0 +1,18 @@
+#Gitignore borrowed from jzjcore
+
+#unused/awful quartus stuff
+hw/simulation
+*.bak
+hw/.qsys_edit
+
+#Don't need to be distributed because they are easily generated from other files
+*.vcd
+hw/output_files
+hw/incremental_db
+hw/db
+hw/*.qws
+*.o
+*.bin
+
+#Other things
+*.kate-swp
