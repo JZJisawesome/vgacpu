@@ -39,6 +39,7 @@ logic [2:0] vga_fb_pixel;
 inferred_sram #(
     .INITIALIZE_FROM_FILE(0),//TODO eventually do init this for file (maybe show some default logo/for testing)
 	.D_WIDTH(3),
+	.TOTAL_WORDS(214 * 160),
 	.A_WIDTH(16)//214x160 pixels
 ) framebuffer (
     .clk(clk_50),

@@ -15,7 +15,8 @@ module inferred_sram #(
 	parameter FILE = "rom.mem",
 	parameter FILE_TYPE_BIN = 0,//Hex by default
 	parameter D_WIDTH = 8,
-	parameter A_WIDTH = 8
+	parameter TOTAL_WORDS = 0,//If 0, TOTAL_WORDS is inferred from A_WIDTH (becomes 2 ** A_WIDTH)
+	parameter A_WIDTH = 8//Must be large enough to accomodate the number of words
 ) (
 	input logic clk,
 	
@@ -43,8 +44,8 @@ localparam D_MAX = D_WIDTH - 1;
 localparam D_MIN = 0;
 localparam A_MAX = A_WIDTH - 1;
 localparam A_MIN = 0;
-localparam int NUM_ADDR = 2 ** A_WIDTH;
-localparam LAST_ADDR = NUM_ADDR - 1;
+localparam int NUM_ADDR = (TOTAL_WORDS != 0) ? TOTAL_WORDS : (2 ** A_WIDTH);
+localparam LAST_ADDR = TOTAL_WORDS - 1;
 localparam FIRST_ADDR = 0;
 
 //The actual inferred SRAM
