@@ -4,8 +4,7 @@
  * Top-level file for the project's hardware.
  *
 */
-module vgacpu_top
-(
+module vgacpu_top (
     input logic clk,
     input logic n_rst,
 
@@ -25,5 +24,15 @@ assign clk_50 = clk;
 
 //Connections Between CPU, Rasterizer, VGA Module, etc
 //TODO
+
+
+//TESTING sram
+inferred_sram #(
+    .INITIALIZE_FROM_FILE(0),
+	.D_WIDTH(8),
+	.A_WIDTH(8)
+) test_sram (
+    .clk(clk_50)
+);
 
 endmodule

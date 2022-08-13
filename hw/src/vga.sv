@@ -4,7 +4,7 @@
  * Module for outputing VGA video from a framebuffer.
  *
 */
-module vgacpu_top
+module vga
 (
     input logic clk,//50MHz
     input logic n_rst,
