@@ -12,6 +12,7 @@ module vga
 (
     input logic clk,//50MHz
     input logic rst_async,
+    input logic en,
 
     //VGA Outputs (640x480)
     output logic vga_r, vga_g, vga_b,
@@ -70,8 +71,8 @@ end
 //TODO use gtkwave and play around with these a bit (with regards to inclusivity/exclusivity)
 //Make sure the periods in GTKwave are correct
 
-assign vga_hsync = ~((x_cnt >= X_SYNC_BEGIN) & (x_cnt <= X_SYNC_END));
-assign vga_vsync = ~((y_cnt >= Y_SYNC_BEGIN) & (y_cnt <= Y_SYNC_END));
+assign vga_hsync = ~((x_cnt >= X_SYNC_BEGIN) & (x_cnt <= X_SYNC_END) & en);
+assign vga_vsync = ~((y_cnt >= Y_SYNC_BEGIN) & (y_cnt <= Y_SYNC_END) & en);
 
 /* Framebuffer Access and Output Logic */
 
@@ -82,9 +83,9 @@ logic in_visible_region;
 //Make sure the periods in GTKwave are correct
 assign in_visible_region = (x_cnt < X_VISIBLE) & (y_cnt < Y_VISIBLE);
 
-assign vga_r = in_visible_region & fb_pixel[0];
-assign vga_g = in_visible_region & fb_pixel[1];
-assign vga_b = in_visible_region & fb_pixel[2];
+assign vga_r = en & in_visible_region & fb_pixel[0];
+assign vga_g = en & in_visible_region & fb_pixel[1];
+assign vga_b = en & in_visible_region & fb_pixel[2];
 
 //FB Access
 
@@ -96,7 +97,7 @@ assign vga_b = in_visible_region & fb_pixel[2];
 //logic [15:0] pixel;
 //assign fb_addr = line_offset + pixel;
 //assign pixel = (x_cnt / 2) / 3;
-//assign line_offset = y_cnt * 214;//214 pixels per line
+//assign line_offset = (y_cnt / 3) * 214;//214 pixels per line; lines last 3 real lines
 
 //More performance and area-efficient option: using a sub-pixel counter
 logic [2:0] sub_pixel_cnt;//We need to count 6 times: 214 is 1/3ish of 640, and the clock is double the pixel clock, so 1/6

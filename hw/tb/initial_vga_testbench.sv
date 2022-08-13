@@ -1,5 +1,5 @@
 //To use, run these commands from the /hw directory:
-//iverilog ./src/vgacpu_top.sv ./src/inferred_sram.sv ./src/vga.sv ./tb/initial_vga_testbench.sv -g2012 -o /tmp/initial_vga_testbench.out
+//iverilog ./src/*.sv ./tb/initial_vga_testbench.sv -g2012 -o /tmp/initial_vga_testbench.out
 //vvp /tmp/initial_vga_testbench.out
 //gtkwave /tmp/initial_vga_testbench.vcd
 

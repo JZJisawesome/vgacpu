@@ -33,25 +33,41 @@ assign clk_50 = clk;
 logic [15:0] vga_fb_addr;
 logic [2:0] vga_fb_pixel;
 
+//Framebuffer-Rasterizer connections
+logic [15:0] gpu_fb_addr;
+logic gpu_fb_write_en;
+logic [2:0] gpu_fb_pixel;
+
 /* Module instantiations */
 
 //Framebuffer
 inferred_sram #(
     .INITIALIZE_FROM_FILE(0),//TODO eventually do init this for file (maybe show some default logo/for testing)
-	.D_WIDTH(3),
-	.TOTAL_WORDS(214 * 160),
-	.A_WIDTH(16)//214x160 pixels
+    .D_WIDTH(3),
+    .TOTAL_WORDS(214 * 160),
+    .A_WIDTH(16)//214x160 pixels
 ) framebuffer (
     .clk(clk_50),
+
+    //Port A
+    //Reading
     .read_addr_a(vga_fb_addr),
-    .read_a(vga_fb_pixel)
-    //TODO other connections
+    .read_a(vga_fb_pixel),
+    //Port A writing not used
+
+    //Port B
+    //Port B reading not used
+	//Writing
+	.write_addr_b(gpu_fb_addr),
+	.write_en_b(gpu_fb_write_en),
+    .write_b(gpu_fb_pixel)
 );
 
 //VGA Output Module
 vga vga_output_controller (
     .clk(clk_50),
     .rst_async(rst_async),
+    .en(1),//TODO may want to control this via some mechanism in the future
 
     //VGA Outputs (640x480)
     .vga_r(vga_r), .vga_g(vga_g), .vga_b(vga_b),
@@ -60,6 +76,23 @@ vga vga_output_controller (
     //Framebuffer access
     .fb_addr(vga_fb_addr),
     .fb_pixel(vga_fb_pixel)
+);
+
+//Rasterizer
+rasterizer gpu (
+    .clk(clk_50),
+    .rst_async(rst_async),
+
+    //TODO connections between rasterizer and cpu
+
+    //TESTING
+    .command(1),
+    .colour(3'b101),
+    .execute_request(1),
+
+    .fb_addr(gpu_fb_addr),
+	.fb_write_en(gpu_fb_write_en),
+	.fb_pixel(gpu_fb_pixel)
 );
 
 endmodule
