@@ -88,6 +88,9 @@ assign vga_b = in_visible_region & fb_pixel[2];
 
 //FB Access
 
+//FIXME We must also repeat lines 3 times as well!
+//We need slightly more complicated logic for that
+
 //Old method; kept to see an alternative view of what is going on
 //logic [15:0] line_offset;
 //logic [15:0] pixel;
@@ -96,7 +99,6 @@ assign vga_b = in_visible_region & fb_pixel[2];
 //assign line_offset = y_cnt * 214;//214 pixels per line
 
 //More performance and area-efficient option: using a sub-pixel counter
-
 logic [2:0] sub_pixel_cnt;//We need to count 6 times: 214 is 1/3ish of 640, and the clock is double the pixel clock, so 1/6
 logic [15:0] pixel_cnt;
 
@@ -113,34 +115,13 @@ always_ff @(posedge rst_async, posedge clk) begin
 
             if (next_sub_pixel_cnt == 0)//Moving to the next pixel
                 pixel_cnt <= pixel_cnt + 1;
+        end else if (vga_vsync) begin//Now is a good time to reset both counters for the next frame
+            pixel_cnt <= '0;
+            sub_pixel_cnt <= '0;
         end
     end
 end
 
 assign fb_addr = pixel_cnt;
-
-
-//TODO
-
-//TODO plan out the timing of this (need to fetch pixel data from framebuffer in time for VGA timing/etc)
-//Perhaps have independent x and y counters continuously incrementing + wrapping after the corrent count
-//HSYNC and YSYNC can be directly driven based off of those
-//Those counters can serve as inputs to a state machine that deals with actually drawing pixels/driving the r g and b lines,
-//accessing the FB, etc
-
-//So the pixel clock for our desired VGA signal is 25MHz, and we have double that. This gives us more breathing room!
-
-
-//TESTING ensuring FPGA can support only 3 bit wide sram (unlikely, will likely need to rethink things)
-
-//TESTING
-/*
-assign fb_addr = {y_cnt[4:0], x_cnt};
-assign vga_r = fb_pixel[0];
-assign vga_g = fb_pixel[1];
-assign vga_b = fb_pixel[2];
-*/
-
-//Huh, I guess the FPGA is totally cool with the word width being only 3 bits :)
 
 endmodule
