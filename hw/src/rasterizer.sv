@@ -5,16 +5,16 @@
  *
 */
 
-typedef enum logic [7:0] {NOP = 0, FILL = 1, POINT = 2 /* TODO add others */} command_t;//TODO move this to some common package
-
-module rasterizer (
+module rasterizer
+    import common::raster_command_t;
+(
     input logic clk,//50MHz
     input logic rst_async,
 
     //TODO interface between CPU and this module
 
     //CPU-GPU Interface
-    input command_t command,
+    input raster_command_t command,
     input logic [7:0] x0, y0, x1, y1,
     input logic [2:0] colour,
     input logic execute_request,//Hold for 1 clock cycle to begin execution; DO NOT ACTIVATE WHILE BUSY
@@ -50,7 +50,7 @@ logic [2:0] point_fb_pixel;
 /* CPU Interface Logic */
 
 //Logic for latching the interface values into registers when the execute_request line is asserted
-command_t command_reg;
+raster_command_t command_reg;
 logic [7:0] x0_reg, x1_reg, y0_reg, y1_reg;
 logic [2:0] colour_reg;
 
@@ -83,17 +83,23 @@ end
 
 always_comb begin
     case (command_reg)
-        NOP: begin
+        common::RASTER_CMD_NOP: begin
             fb_addr = nop_fb_addr;
             fb_write_en = nop_fb_write_en;
             fb_pixel = nop_fb_pixel;
             done = nop_done;
         end
-        FILL: begin
+        common::RASTER_CMD_FILL: begin
             fb_addr = fill_fb_addr;
             fb_write_en = fill_fb_write_en;
             fb_pixel = fill_fb_pixel;
             done = fill_done;
+        end
+        common::RASTER_CMD_POINT: begin
+            fb_addr = point_fb_addr;
+            fb_write_en = point_fb_write_en;
+            fb_pixel = point_fb_pixel;
+            done = point_done;
         end
         default: begin
             fb_addr = 'x;

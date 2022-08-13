@@ -4,15 +4,21 @@
  * Top-level file for the project's hardware.
  *
 */
-module vgacpu_top (
+
+module vgacpu_top
+    import common::raster_command_t;//TEMPORARY just for testing
+(
     input logic clk,
     input logic n_rst_async,
 
-    //TODO button inputs, VGA outputs
+    //TODO button inputs
 
     //VGA Outputs (640x480)
     output logic vga_r, vga_g, vga_b,
-    output logic vga_hsync, vga_vsync
+    output logic vga_hsync, vga_vsync,
+
+    //Buzzer Output:
+    output logic buzzer
 );
 
 /* Clocking And Reset */
@@ -57,9 +63,9 @@ inferred_sram #(
 
     //Port B
     //Port B reading not used
-	//Writing
-	.write_addr_b(gpu_fb_addr),
-	.write_en_b(gpu_fb_write_en),
+    //Writing
+    .write_addr_b(gpu_fb_addr),
+    .write_en_b(gpu_fb_write_en),
     .write_b(gpu_fb_pixel)
 );
 
@@ -86,13 +92,26 @@ rasterizer gpu (
     //TODO connections between rasterizer and cpu
 
     //TESTING
-    .command(1),
+    .command(common::RASTER_CMD_FILL),
     .colour(3'b101),
     .execute_request(1),
 
     .fb_addr(gpu_fb_addr),
-	.fb_write_en(gpu_fb_write_en),
-	.fb_pixel(gpu_fb_pixel)
+    .fb_write_en(gpu_fb_write_en),
+    .fb_pixel(gpu_fb_pixel)
+);
+
+//Sound
+sound snd (
+    .clk(clk_50),
+    .rst_async(rst_async),
+
+    //TESTING
+    .freq(vga_fb_addr),
+    .latch_freq(1),
+
+
+    .buzzer(buzzer)
 );
 
 endmodule
