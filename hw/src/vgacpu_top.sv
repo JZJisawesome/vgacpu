@@ -49,7 +49,7 @@ logic [2:0] gpu_fb_pixel;
 //Framebuffer
 inferred_sram #(
     .INITIALIZE_FROM_FILE(1),//TODO eventually do init this for file (maybe show some default logo/for testing)
-    .FILE("init_fb.hex"),
+    .FILE("src/init_fb.hex"),
 	.FILE_TYPE_BIN(1),
     .D_WIDTH(3),
     .TOTAL_WORDS(214 * 160),

@@ -89,41 +89,78 @@ assign vga_b = en & in_visible_region & fb_pixel[0];
 
 //FB Access
 
-//FIXME We must also repeat lines 3 times as well!
-//We need slightly more complicated logic for that
-
 //Old method; kept to see an alternative view of what is going on
-logic [15:0] line_offset;
+//NOTE: DON'T USE THIS: It relies on division which is not good
+/*logic [15:0] line_offset;
 logic [15:0] pixel;
 assign fb_addr = line_offset + pixel;
 assign pixel = (x_cnt / 2) / 3;
 assign line_offset = (y_cnt / 3) * 214;//214 pixels per line; lines last 3 real lines
+*/
 
-//More performance and area-efficient option: using a sub-pixel counter
-/*logic [2:0] sub_pixel_cnt;//We need to count 6 times: 214 is 1/3ish of 640, and the clock is double the pixel clock, so 1/6
-logic [15:0] pixel_cnt;
+//More performant and area-efficient option: using seperate counters instead
+//TODO make this even more efficient and faster
 
+//Subpixel Counter
+logic [2:0] sub_pixel_cnt;//We need to count 6 times: 214 is 1/3ish of 640, and the clock is double the pixel clock (50MHz), so 1/6
 logic [2:0] next_sub_pixel_cnt;
 assign next_sub_pixel_cnt = (sub_pixel_cnt == 5) ? '0 : (sub_pixel_cnt + 1);
-
 always_ff @(posedge rst_async, posedge clk) begin
     if (rst_async) begin
-        pixel_cnt <= '0;
         sub_pixel_cnt <= '0;
     end else if (clk) begin
-        if (in_visible_region) begin
+        if (in_visible_region)
             sub_pixel_cnt <= next_sub_pixel_cnt;
-
-            if (next_sub_pixel_cnt == 0)//Moving to the next pixel
-                pixel_cnt <= pixel_cnt + 1;
-        end else if (vga_vsync) begin//Now is a good time to reset both counters for the next frame
-            pixel_cnt <= '0;
+        else if (~vga_hsync) begin
+            //A line is not quite 214 pixels (really 213.333...)
+            //So we end up partially counting at the end of a line which is an issue
+            //So we reset the subpixel count at the end of each line
+            //We can just use the hsync signal to determine when that is
             sub_pixel_cnt <= '0;
         end
     end
 end
 
-assign fb_addr = pixel_cnt;
-*/
+//Pixel Counter (Horizontal)
+logic [7:0] pixel_cnt;
+
+always_ff @(posedge rst_async, posedge clk) begin
+    if (rst_async) begin
+        pixel_cnt <= '0;
+    end else if (clk) begin
+        if (in_visible_region) begin
+            if (next_sub_pixel_cnt == '0)//We're moving to the next pixel
+                pixel_cnt <= pixel_cnt + 1;
+        end else
+            pixel_cnt <= '0;//Reset the pixel count in prep for the next line
+    end
+end
+
+//Line Repeating/Counting Logic
+logic [15:0] line_offset;
+
+logic [1:0] line_cnt;//We repeat lines 3 times
+logic [1:0] next_line_cnt;
+assign next_line_cnt = (line_cnt == 2) ? '0 : (line_cnt + 1);
+
+always_ff @(posedge rst_async, posedge clk) begin
+    if (rst_async) begin
+        line_offset <= '0;
+        line_cnt <= '0;
+    end else if (clk) begin
+        //We only want to do the following once per line at the end
+        //Do it slightly before the end so that we get the proper framebuffer
+        //address in time (not that this should actually matter)
+        if (x_cnt == (X_MAX - 1)) begin
+            line_cnt <= next_line_cnt;
+
+            if (next_line_cnt == '0)//We repeated the line 3 times, so go to the next one in the FB
+                line_offset <= line_offset + 214;
+        end
+    end
+end
+
+//Combine the current line and the pixel on the line to get the desired address
+assign fb_addr = line_offset + pixel_cnt;
 
 endmodule
