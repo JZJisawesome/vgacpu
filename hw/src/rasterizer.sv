@@ -121,6 +121,7 @@ assign nop_done = 1;//NOP finishes immediately always
 
 //Command: Fill
 assign fill_fb_pixel = colour_reg;
+//assign fill_fb_pixel = next_seq_fb_addr;//TESTING for fun :)
 assign fill_fb_write_en = 1;
 logic [15:0] next_seq_fb_addr;
 assign next_seq_fb_addr = fill_fb_addr + 1;

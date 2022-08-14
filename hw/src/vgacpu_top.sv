@@ -95,6 +95,7 @@ rasterizer gpu (
     .command(common::RASTER_CMD_FILL),
     .colour(3'b101),
     .execute_request(1),
+    //.execute_request(0),
 
     .fb_addr(gpu_fb_addr),
     .fb_write_en(gpu_fb_write_en),
@@ -107,7 +108,7 @@ sound snd (
     .rst_async(rst_async),
 
     //TESTING
-    .freq(vga_fb_addr),
+    .freq(0),
     .latch_freq(1),
 
 

@@ -38,7 +38,7 @@
 
 
 set_global_assignment -name FAMILY "Cyclone IV E"
-set_global_assignment -name DEVICE AUTO
+set_global_assignment -name DEVICE EP4CE6E22C8
 set_global_assignment -name TOP_LEVEL_ENTITY vgacpu_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 21.1.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:32:26  AUGUST 12, 2022"
@@ -54,4 +54,24 @@ set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/vgacpu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/vga.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/rasterizer.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/vgacpu_top.sv
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_location_assignment PIN_23 -to clk
+set_location_assignment PIN_25 -to n_rst_async
+set_location_assignment PIN_110 -to buzzer
+set_location_assignment PIN_104 -to vga_b
+set_location_assignment PIN_105 -to vga_g
+set_location_assignment PIN_106 -to vga_r
+set_location_assignment PIN_101 -to vga_hsync
+set_location_assignment PIN_103 -to vga_vsync
+set_global_assignment -name ENABLE_OCT_DONE OFF
+set_global_assignment -name ENABLE_CONFIGURATION_PINS OFF
+set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
+set_global_assignment -name USE_CONFIGURATION_DEVICE OFF
+set_global_assignment -name CRC_ERROR_OPEN_DRAIN OFF
+set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
