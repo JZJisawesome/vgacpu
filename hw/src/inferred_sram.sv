@@ -75,9 +75,9 @@ initial begin
 	if (INITIALIZE_FROM_FILE)
 	begin
 		if (FILE_TYPE_BIN)
-		  $readmemb(FILE, ram);
+		  $readmemb(FILE, sram);
 		else
-		  $readmemh(FILE, ram);
+		  $readmemh(FILE, sram);
 	end
 end
 

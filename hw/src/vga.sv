@@ -83,9 +83,9 @@ logic in_visible_region;
 //Make sure the periods in GTKwave are correct
 assign in_visible_region = (x_cnt < X_VISIBLE) & (y_cnt < Y_VISIBLE);
 
-assign vga_r = en & in_visible_region & fb_pixel[0];
+assign vga_r = en & in_visible_region & fb_pixel[2];
 assign vga_g = en & in_visible_region & fb_pixel[1];
-assign vga_b = en & in_visible_region & fb_pixel[2];
+assign vga_b = en & in_visible_region & fb_pixel[0];
 
 //FB Access
 
@@ -93,14 +93,14 @@ assign vga_b = en & in_visible_region & fb_pixel[2];
 //We need slightly more complicated logic for that
 
 //Old method; kept to see an alternative view of what is going on
-//logic [15:0] line_offset;
-//logic [15:0] pixel;
-//assign fb_addr = line_offset + pixel;
-//assign pixel = (x_cnt / 2) / 3;
-//assign line_offset = (y_cnt / 3) * 214;//214 pixels per line; lines last 3 real lines
+logic [15:0] line_offset;
+logic [15:0] pixel;
+assign fb_addr = line_offset + pixel;
+assign pixel = (x_cnt / 2) / 3;
+assign line_offset = (y_cnt / 3) * 214;//214 pixels per line; lines last 3 real lines
 
 //More performance and area-efficient option: using a sub-pixel counter
-logic [2:0] sub_pixel_cnt;//We need to count 6 times: 214 is 1/3ish of 640, and the clock is double the pixel clock, so 1/6
+/*logic [2:0] sub_pixel_cnt;//We need to count 6 times: 214 is 1/3ish of 640, and the clock is double the pixel clock, so 1/6
 logic [15:0] pixel_cnt;
 
 logic [2:0] next_sub_pixel_cnt;
@@ -124,5 +124,6 @@ always_ff @(posedge rst_async, posedge clk) begin
 end
 
 assign fb_addr = pixel_cnt;
+*/
 
 endmodule

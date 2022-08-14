@@ -48,7 +48,9 @@ logic [2:0] gpu_fb_pixel;
 
 //Framebuffer
 inferred_sram #(
-    .INITIALIZE_FROM_FILE(0),//TODO eventually do init this for file (maybe show some default logo/for testing)
+    .INITIALIZE_FROM_FILE(1),//TODO eventually do init this for file (maybe show some default logo/for testing)
+    .FILE("init_fb.hex"),
+	.FILE_TYPE_BIN(1),
     .D_WIDTH(3),
     .TOTAL_WORDS(214 * 160),
     .A_WIDTH(16)//214x160 pixels
@@ -92,10 +94,10 @@ rasterizer gpu (
     //TODO connections between rasterizer and cpu
 
     //TESTING
-    .command(common::RASTER_CMD_FILL),
-    .colour(3'b101),
-    .execute_request(1),
-    //.execute_request(0),
+    //.command(common::RASTER_CMD_FILL),
+    //.colour(3'b101),
+    //.execute_request(1),
+    .execute_request(0),
 
     .fb_addr(gpu_fb_addr),
     .fb_write_en(gpu_fb_write_en),
