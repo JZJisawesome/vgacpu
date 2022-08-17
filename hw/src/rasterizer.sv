@@ -34,6 +34,7 @@ logic nop_done;
 logic fill_done;
 logic point_done;
 logic line_done;
+logic rect_done;
 
 //FB Access signals
 logic [15:0] nop_fb_addr;
@@ -51,6 +52,10 @@ logic [2:0] point_fb_pixel;
 logic [15:0] line_fb_addr;
 logic line_fb_write_en;
 logic [2:0] line_fb_pixel;
+
+logic [15:0] rect_fb_addr;
+logic rect_fb_write_en;
+logic [2:0] rect_fb_pixel;
 
 /* CPU Interface Logic */
 
@@ -110,7 +115,13 @@ always_comb begin
             fb_addr = line_fb_addr;
             fb_write_en = line_fb_write_en & busy;
             fb_pixel = line_fb_pixel;
-            done = point_done;
+            done = line_done;
+        end
+        common::RASTER_CMD_RECT: begin
+            fb_addr = rect_fb_addr;
+            fb_write_en = rect_fb_write_en & busy;
+            fb_pixel = rect_fb_pixel;
+            done = rect_done;
         end
         default: begin
             fb_addr = 'x;
@@ -164,9 +175,10 @@ always_ff @(posedge rst_async, posedge clk) begin
         line_init <= '0;
     end else if (clk) begin
         if (busy) begin//A request to draw a line is in progress
-            if (~line_init)//We haven't initialized things for line drawing yet
+            if (~line_init) begin//We haven't initialized things for line drawing yet
                 line_slope_error_new <= m_new - (x1 - x0);//Set the initial slope error
-            else begin
+                line_init <= 1;
+            end else begin
                 line_slope_error_new <= line_slope_error_new + m_new;
                 //TODO implement
             end
@@ -190,5 +202,42 @@ always_ff @(posedge rst_async, posedge clk) begin
     end
 end
 */
+
+//Command: Rectangle
+logic rect_init;
+
+assign rect_fb_pixel = colour_reg;
+assign rect_fb_write_en = rect_init;//Only begin writing pixels when init has finished
+
+logic [7:0] rect_x_cnt;
+logic [7:0] rect_next_seq_x_cnt;
+assign rect_next_seq_x_cnt = rect_x_cnt + 1;
+logic [7:0] rect_y_cnt;
+logic [7:0] rect_next_seq_y_cnt;
+assign rect_next_seq_y_cnt = rect_y_cnt + 1;
+
+always_ff @(posedge clk, posedge rst_async) begin
+    if (rst_async) begin
+        rect_init <= 0;
+    end else if (clk) begin
+        if (busy) begin//A request to draw a rectangle is in progress
+            if (~rect_init) begin//We haven't initialized things for rect drawing yet
+                rect_x_cnt <= x0;
+                rect_y_cnt <= y0;
+                rect_init <= 1;
+            end else begin
+                rect_x_cnt <= (rect_next_seq_x_cnt < x1) ? rect_next_seq_x_cnt : x0;
+
+                if (rect_next_seq_x_cnt >= x1)
+                    rect_y_cnt <= (rect_next_seq_y_cnt < y1) ? rect_next_seq_y_cnt : y0;
+            end
+        end else
+            rect_init <= 0;
+    end
+end
+
+assign rect_fb_addr = rect_x_cnt + (rect_y_cnt * 214);//TODO avoid multiplication
+
+assign rect_done = (rect_x_cnt == x1_reg) & (rect_y_cnt == y1_reg);
 
 endmodule

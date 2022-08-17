@@ -40,15 +40,46 @@ module vgacpu
 //assign gpu_colour = 3'b101;
 //assign gpu_execute_request = 1;
 
-assign gpu_command = common::RASTER_CMD_LINE;
+/*assign gpu_command = common::RASTER_CMD_LINE;
 assign gpu_x0 = 10;
 assign gpu_y0 = 10;
 assign gpu_x1 = 100;
 assign gpu_y1 = 100;
 assign gpu_colour = 3'b110;
 assign gpu_execute_request = 1;
+*/
+
+assign gpu_command = common::RASTER_CMD_RECT;
+/*assign gpu_x0 = 10;
+assign gpu_y0 = 90;
+assign gpu_x1 = 204;
+assign gpu_y1 = 130;
+assign gpu_colour = 3'b110;
+*/
+
+assign gpu_x1 = gpu_x0 + 20;
+assign gpu_y1 = gpu_y0 + 20;
+
+logic [23:0] divider;
+logic [7:0] x_counter, y_counter;
+always @(posedge clk) begin
+    divider <= divider + 1;
+
+    if (divider == 0) begin
+        gpu_x0 <= gpu_x0 + 1;
+        gpu_y0 <= gpu_y0 + 1;
+    end
+end
+
+logic [27:0] colour_counter;
+assign gpu_colour = colour_counter[27:25];
+always @(posedge clk) begin
+    colour_counter <= colour_counter + 1;
+end
+
+assign gpu_execute_request = 1;
 
 assign snd_max_count = (50000000 / 1000) / 2;//1000KHz
-assign snd_latch_max_count = 1;
+assign snd_latch_max_count = 0;//1;
 
 endmodule
