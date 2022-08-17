@@ -33,6 +33,7 @@ module rasterizer
 logic nop_done;
 logic fill_done;
 logic point_done;
+logic line_done;
 
 //FB Access signals
 logic [15:0] nop_fb_addr;
@@ -46,6 +47,10 @@ logic [2:0] fill_fb_pixel;
 logic [15:0] point_fb_addr;
 logic point_fb_write_en;
 logic [2:0] point_fb_pixel;
+
+logic [15:0] line_fb_addr;
+logic line_fb_write_en;
+logic [2:0] line_fb_pixel;
 
 /* CPU Interface Logic */
 
@@ -85,20 +90,26 @@ always_comb begin
     case (command_reg)
         common::RASTER_CMD_NOP: begin
             fb_addr = nop_fb_addr;
-            fb_write_en = nop_fb_write_en;
+            fb_write_en = nop_fb_write_en & busy;
             fb_pixel = nop_fb_pixel;
             done = nop_done;
         end
         common::RASTER_CMD_FILL: begin
             fb_addr = fill_fb_addr;
-            fb_write_en = fill_fb_write_en;
+            fb_write_en = fill_fb_write_en & busy;
             fb_pixel = fill_fb_pixel;
             done = fill_done;
         end
         common::RASTER_CMD_POINT: begin
             fb_addr = point_fb_addr;
-            fb_write_en = point_fb_write_en;
+            fb_write_en = point_fb_write_en & busy;
             fb_pixel = point_fb_pixel;
+            done = point_done;
+        end
+        common::RASTER_CMD_LINE: begin
+            fb_addr = line_fb_addr;
+            fb_write_en = line_fb_write_en & busy;
+            fb_pixel = line_fb_pixel;
             done = point_done;
         end
         default: begin
@@ -121,7 +132,6 @@ assign nop_done = 1;//NOP finishes immediately always
 
 //Command: Fill
 assign fill_fb_pixel = colour_reg;
-//assign fill_fb_pixel = next_seq_fb_addr;//TESTING for fun :)
 assign fill_fb_write_en = 1;
 logic [15:0] next_seq_fb_addr;
 assign next_seq_fb_addr = fill_fb_addr + 1;
@@ -138,6 +148,33 @@ assign point_fb_pixel = colour_reg;
 assign point_fb_write_en = 1;
 assign point_done = 1;//Only takes 1 clock cycle :)
 assign point_fb_addr = x0 + (y0 * 214);//FIXME avoid the multiplication
+
+//Command: Line
+//Thanks: https://www.geeksforgeeks.org/bresenhams-line-generation-algorithm/
+assign line_fb_pixel = colour_reg;
+assign line_fb_write_en = line_init;//Only begin writing pixels when init has finished
+
+logic line_init;
+logic [8:0] m_new;
+assign line_m_new = {y1 - y0, 1'b0};//2 * (y1 - y0)
+logic [8:0] line_slope_error_new;
+
+always_ff @(posedge rst_async, posedge clk) begin
+    if (rst_async) begin
+        line_init <= '0;
+    end else if (clk) begin
+        if (busy) begin//A request to draw a line is in progress
+            if (~line_init)//We haven't initialized things for line drawing yet
+                line_slope_error_new <= m_new - (x1 - x0);//Set the initial slope error
+            else begin
+                line_slope_error_new <= line_slope_error_new + m_new;
+                //TODO implement
+            end
+        end else
+            line_init <= '0;
+    end
+end
+
 
 //TESTING
 //Fun test: Begin by just writing an incrementing value to incrementing addresses of the FB

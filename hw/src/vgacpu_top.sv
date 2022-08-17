@@ -17,7 +17,7 @@ module vgacpu_top
     output logic vga_r, vga_g, vga_b,
     output logic vga_hsync, vga_vsync,
 
-    //Buzzer Output:
+    //Buzzer Output
     output logic buzzer
 );
 
@@ -31,9 +31,18 @@ assign rst_async = ~n_rst_async;
 logic clk_50;
 assign clk_50 = clk;
 
-/* Connections Between CPU, Rasterizer, VGA Module, etc */
+/* Connections Between CPU, Rasterizer, VGA Module, Framebuffer, Sound, etc */
 
-//TODO
+//CPU-GPU connections
+raster_command_t gpu_command;
+logic [7:0] gpu_x0, gpu_y0, gpu_x1, gpu_y1;
+logic [2:0] gpu_colour;
+logic gpu_execute_request;
+logic gpu_busy;
+
+//CPU-Sound connections
+logic [25:0] snd_max_count;//Enough bits for frequencies as low as < 1hz
+logic snd_latch_max_count;//Hold for 1 clock cycle to latch the new max count
 
 //Framebuffer-VGA Output Module connections
 logic [15:0] vga_fb_addr;
@@ -53,7 +62,7 @@ inferred_sram #(
 	.FILE_TYPE_BIN(1),
     .D_WIDTH(3),
     .TOTAL_WORDS(214 * 160),
-    .A_WIDTH(16)//214x160 pixels
+    .A_WIDTH(16)//We needs 16 bits of addresses to access it all
 ) framebuffer (
     .clk(clk_50),
 
@@ -93,12 +102,17 @@ rasterizer gpu (
 
     //TODO connections between rasterizer and cpu
 
-    //TESTING
-    //.command(common::RASTER_CMD_FILL),
-    //.colour(3'b101),
-    //.execute_request(1),
-    .execute_request(0),
+    //CPU-GPU Interface
+    .command(gpu_command),
+    .x0(gpu_x0),
+    .y0(gpu_y0),
+    .x1(gpu_x1),
+    .y1(gpu_y1),
+    .colour(gpu_colour),
+    .execute_request(gpu_execute_request),
+    .busy(gpu_busy),
 
+    //Framebuffer Access
     .fb_addr(gpu_fb_addr),
     .fb_write_en(gpu_fb_write_en),
     .fb_pixel(gpu_fb_pixel)
@@ -109,12 +123,13 @@ sound snd (
     .clk(clk_50),
     .rst_async(rst_async),
 
-    //TESTING
-    .freq(0),
-    .latch_freq(1),
-
+    .max_count(snd_max_count),
+    .latch_max_count(snd_latch_max_count),
 
     .buzzer(buzzer)
 );
+
+//CPU
+vgacpu cpu (.*);
 
 endmodule

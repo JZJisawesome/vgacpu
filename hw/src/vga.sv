@@ -67,9 +67,6 @@ always_ff @(posedge rst_async, posedge clk) begin
 end
 
 /* HSYNC and VSYNC Outputs */
-//Inverted since the sync outputs are active low
-//TODO use gtkwave and play around with these a bit (with regards to inclusivity/exclusivity)
-//Make sure the periods in GTKwave are correct
 
 assign vga_hsync = ~((x_cnt >= X_SYNC_BEGIN) & (x_cnt <= X_SYNC_END) & en);
 assign vga_vsync = ~((y_cnt >= Y_SYNC_BEGIN) & (y_cnt <= Y_SYNC_END) & en);
@@ -78,9 +75,6 @@ assign vga_vsync = ~((y_cnt >= Y_SYNC_BEGIN) & (y_cnt <= Y_SYNC_END) & en);
 
 //Output Logic
 logic in_visible_region;
-
-//TODO use gtkwave and play around with this a bit (with regards to inclusivity/exclusivity)
-//Make sure the periods in GTKwave are correct
 assign in_visible_region = (x_cnt < X_VISIBLE) & (y_cnt < Y_VISIBLE);
 
 assign vga_r = en & in_visible_region & fb_pixel[2];
@@ -111,7 +105,7 @@ always_ff @(posedge rst_async, posedge clk) begin
     end else if (clk) begin
         if (in_visible_region)
             sub_pixel_cnt <= next_sub_pixel_cnt;
-        else if (~vga_hsync) begin
+        else begin
             //A line is not quite 214 pixels (really 213.333...)
             //So we end up partially counting at the end of a line which is an issue
             //So we reset the subpixel count at the end of each line
@@ -139,7 +133,7 @@ end
 //Line Repeating/Counting Logic
 logic [15:0] line_offset;
 
-logic [1:0] line_cnt;//We repeat lines 3 times
+logic [1:0] line_cnt;//We repeat lines 3 times to divide the vertical rez by 3
 logic [1:0] next_line_cnt;
 assign next_line_cnt = (line_cnt == 2) ? '0 : (line_cnt + 1);
 
@@ -148,10 +142,10 @@ always_ff @(posedge rst_async, posedge clk) begin
         line_offset <= '0;
         line_cnt <= '0;
     end else if (clk) begin
-        //We only want to do the following once per line at the end
-        //Do it slightly before the end so that we get the proper framebuffer
-        //address in time (not that this should actually matter)
-        if (x_cnt == (X_MAX - 1)) begin
+        if (y_cnt == Y_MAX) begin //End of frame; reset the offset and line count
+            line_cnt <= '0;
+            line_offset <= '0;
+        end else if (x_cnt == X_MAX) begin//End of line; increment the line count and adjust the offset
             line_cnt <= next_line_cnt;
 
             if (next_line_cnt == '0)//We repeated the line 3 times, so go to the next one in the FB
