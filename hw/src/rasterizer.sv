@@ -22,10 +22,23 @@ module rasterizer
 
     //Framebuffer Access
     //We only ever need to write, so we only wire up stuff for that
-    output logic [15:0] fb_addr,
-    output logic fb_write_en,
-    output logic [2:0] fb_pixel
+    //We have two ports, so we can write to the framebuffer twice as fast!
+    output logic [15:0] fb_addr_a,
+    output logic fb_write_en_a,
+    output logic [2:0] fb_pixel_a,
+
+    output logic [15:0] fb_addr_b,
+    output logic fb_write_en_b,
+    output logic [2:0] fb_pixel_b
+
+    //TODO write to FB with TWO ports at once for greater speed!!!
+    //TODO if you can't avoid multiplication, try to share a multiplier between different parts
 );
+
+//TODO do this until we take advantage of the b port
+assign fb_addr_b = '0;
+assign fb_write_en_b = '0;
+assign fb_pixel_b = '0;
 
 /* Internal Signals */
 
@@ -37,25 +50,25 @@ logic line_done;
 logic rect_done;
 
 //FB Access signals
-logic [15:0] nop_fb_addr;
-logic nop_fb_write_en;
-logic [2:0] nop_fb_pixel;
+logic [15:0] nop_fb_addr_a;
+logic nop_fb_write_en_a;
+logic [2:0] nop_fb_pixel_a;
 
-logic [15:0] fill_fb_addr;
-logic fill_fb_write_en;
-logic [2:0] fill_fb_pixel;
+logic [15:0] fill_fb_addr_a;
+logic fill_fb_write_en_a;
+logic [2:0] fill_fb_pixel_a;
 
-logic [15:0] point_fb_addr;
-logic point_fb_write_en;
-logic [2:0] point_fb_pixel;
+logic [15:0] point_fb_addr_a;
+logic point_fb_write_en_a;
+logic [2:0] point_fb_pixel_a;
 
-logic [15:0] line_fb_addr;
-logic line_fb_write_en;
-logic [2:0] line_fb_pixel;
+logic [15:0] line_fb_addr_a;
+logic line_fb_write_en_a;
+logic [2:0] line_fb_pixel_a;
 
-logic [15:0] rect_fb_addr;
-logic rect_fb_write_en;
-logic [2:0] rect_fb_pixel;
+logic [15:0] rect_fb_addr_a;
+logic rect_fb_write_en_a;
+logic [2:0] rect_fb_pixel_a;
 
 /* CPU Interface Logic */
 
@@ -94,39 +107,39 @@ end
 always_comb begin
     case (command_reg)
         common::RASTER_CMD_NOP: begin
-            fb_addr = nop_fb_addr;
-            fb_write_en = nop_fb_write_en & busy;
-            fb_pixel = nop_fb_pixel;
+            fb_addr_a = nop_fb_addr_a;
+            fb_write_en_a = nop_fb_write_en_a & busy;
+            fb_pixel_a = nop_fb_pixel_a;
             done = nop_done;
         end
         common::RASTER_CMD_FILL: begin
-            fb_addr = fill_fb_addr;
-            fb_write_en = fill_fb_write_en & busy;
-            fb_pixel = fill_fb_pixel;
+            fb_addr_a = fill_fb_addr_a;
+            fb_write_en_a = fill_fb_write_en_a & busy;
+            fb_pixel_a = fill_fb_pixel_a;
             done = fill_done;
         end
         common::RASTER_CMD_POINT: begin
-            fb_addr = point_fb_addr;
-            fb_write_en = point_fb_write_en & busy;
-            fb_pixel = point_fb_pixel;
+            fb_addr_a = point_fb_addr_a;
+            fb_write_en_a = point_fb_write_en_a & busy;
+            fb_pixel_a = point_fb_pixel_a;
             done = point_done;
         end
         common::RASTER_CMD_LINE: begin
-            fb_addr = line_fb_addr;
-            fb_write_en = line_fb_write_en & busy;
-            fb_pixel = line_fb_pixel;
+            fb_addr_a = line_fb_addr_a;
+            fb_write_en_a = line_fb_write_en_a & busy;
+            fb_pixel_a = line_fb_pixel_a;
             done = line_done;
         end
         common::RASTER_CMD_RECT: begin
-            fb_addr = rect_fb_addr;
-            fb_write_en = rect_fb_write_en & busy;
-            fb_pixel = rect_fb_pixel;
+            fb_addr_a = rect_fb_addr_a;
+            fb_write_en_a = rect_fb_write_en_a & busy;
+            fb_pixel_a = rect_fb_pixel_a;
             done = rect_done;
         end
         default: begin
-            fb_addr = 'x;
-            fb_write_en = 'x;
-            fb_pixel = 'x;
+            fb_addr_a = 'x;
+            fb_write_en_a = 'x;
+            fb_pixel_a = 'x;
             done = 'x;
         end
     endcase
@@ -136,34 +149,34 @@ end
 //TODO add fixed-function hardware to deal with (1 section for each command)
 
 //Command: NOP
-assign nop_fb_addr = 'x;//We never use the fb
-assign nop_fb_write_en = 0;//We never use the fb
-assign nop_fb_pixel = 'x;//We never use the fb
+assign nop_fb_addr_a = 'x;//We never use the fb
+assign nop_fb_write_en_a = 0;//We never use the fb
+assign nop_fb_pixel_a = 'x;//We never use the fb
 assign nop_done = 1;//NOP finishes immediately always
 
 //Command: Fill
-assign fill_fb_pixel = colour_reg;
-assign fill_fb_write_en = 1;
+assign fill_fb_pixel_a = colour_reg;
+assign fill_fb_write_en_a = 1;
 logic [15:0] next_seq_fb_addr;
-assign next_seq_fb_addr = fill_fb_addr + 1;
+assign next_seq_fb_addr = fill_fb_addr_a + 1;
 assign fill_done = next_seq_fb_addr == (214 * 160);//We will wrap around next clock, so we're done!
 always_ff @(posedge clk) begin
     if (~busy)//We're waiting to execute
-        fill_fb_addr <= '0;//Start from the beginning
+        fill_fb_addr_a <= '0;//Start from the beginning
     else//Continually loop over the entire framebuffer (this should only happen once unless execute_request is held for a long time)
-        fill_fb_addr <= (next_seq_fb_addr < (214 * 160)) ? next_seq_fb_addr : '0;
+        fill_fb_addr_a <= (next_seq_fb_addr < (214 * 160)) ? next_seq_fb_addr : '0;
 end
 
 //Command: Point
-assign point_fb_pixel = colour_reg;
-assign point_fb_write_en = 1;
+assign point_fb_pixel_a = colour_reg;
+assign point_fb_write_en_a = 1;
 assign point_done = 1;//Only takes 1 clock cycle :)
-assign point_fb_addr = x0 + (y0 * 214);//FIXME avoid the multiplication
+assign point_fb_addr_a = x0 + (y0 * 214);//FIXME avoid the multiplication
 
 //Command: Line
 //Thanks: https://www.geeksforgeeks.org/bresenhams-line-generation-algorithm/
-assign line_fb_pixel = colour_reg;
-assign line_fb_write_en = line_init;//Only begin writing pixels when init has finished
+assign line_fb_pixel_a = colour_reg;
+assign line_fb_write_en_a = line_init;//Only begin writing pixels when init has finished
 
 logic line_init;
 logic [8:0] m_new;
@@ -190,8 +203,8 @@ end
 //Command: Rectangle
 logic rect_init;
 
-assign rect_fb_pixel = colour_reg;
-assign rect_fb_write_en = rect_init;//Only begin writing pixels when init has finished
+assign rect_fb_pixel_a = colour_reg;
+assign rect_fb_write_en_a = rect_init;//Only begin writing pixels when init has finished
 
 logic [7:0] rect_x_cnt;
 logic [7:0] rect_next_seq_x_cnt;
@@ -220,7 +233,7 @@ always_ff @(posedge clk, posedge rst_async) begin
     end
 end
 
-assign rect_fb_addr = rect_x_cnt + (rect_y_cnt * 214);//TODO avoid multiplication
+assign rect_fb_addr_a = rect_x_cnt + (rect_y_cnt * 214);//TODO avoid multiplication
 
 assign rect_done = (rect_x_cnt == x1_reg) & (rect_y_cnt == y1_reg);
 

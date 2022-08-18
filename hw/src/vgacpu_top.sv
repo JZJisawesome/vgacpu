@@ -20,6 +20,8 @@ module vgacpu_top
 
     //Buzzer Output
     output logic buzzer
+
+    //TODO add PS2 keyboard as input perhaps???
 );
 
 /* Clocking And Reset */
@@ -53,9 +55,13 @@ logic [15:0] vga_fb_addr;
 logic [2:0] vga_fb_pixel;
 
 //Framebuffer-Rasterizer connections
-logic [15:0] gpu_fb_addr;
-logic gpu_fb_write_en;
-logic [2:0] gpu_fb_pixel;
+logic [15:0] gpu_fb_addr_a;
+logic gpu_fb_write_en_a;
+logic [2:0] gpu_fb_pixel_a;
+
+logic [15:0] gpu_fb_addr_b;
+logic gpu_fb_write_en_b;
+logic [2:0] gpu_fb_pixel_b;
 
 /* Module instantiations */
 
@@ -63,7 +69,7 @@ logic [2:0] gpu_fb_pixel;
 inferred_sram #(
     .INITIALIZE_FROM_FILE(1),//TODO eventually do init this for file (maybe show some default logo/for testing)
     .FILE("src/init_fb.hex"),
-	.FILE_TYPE_BIN(1),
+    .FILE_TYPE_BIN(1),
     .D_WIDTH(3),
     .TOTAL_WORDS(214 * 160),
     .A_WIDTH(16)//We needs 16 bits of addresses to access it all
@@ -74,14 +80,17 @@ inferred_sram #(
     //Reading
     .read_addr_a(vga_fb_addr),
     .read_a(vga_fb_pixel),
-    //Port A writing not used
+    //Writing
+    .write_addr_a(gpu_fb_addr_a),
+    .write_en_a(gpu_fb_write_en_a),
+    .write_a(gpu_fb_pixel_a),
 
     //Port B
     //Port B reading not used
     //Writing
-    .write_addr_b(gpu_fb_addr),
-    .write_en_b(gpu_fb_write_en),
-    .write_b(gpu_fb_pixel)
+    .write_addr_b(gpu_fb_addr_b),
+    .write_en_b(gpu_fb_write_en_b),
+    .write_b(gpu_fb_pixel_b)
 );
 
 //VGA Output Module
@@ -117,9 +126,13 @@ rasterizer gpu (
     .busy(gpu_busy),
 
     //Framebuffer Access
-    .fb_addr(gpu_fb_addr),
-    .fb_write_en(gpu_fb_write_en),
-    .fb_pixel(gpu_fb_pixel)
+    .fb_addr_a(gpu_fb_addr_a),
+    .fb_write_en_a(gpu_fb_write_en_a),
+    .fb_pixel_a(gpu_fb_pixel_a),
+
+    .fb_addr_b(gpu_fb_addr_b),
+    .fb_write_en_b(gpu_fb_write_en_b),
+    .fb_pixel_b(gpu_fb_pixel_b)
 );
 
 //Sound
