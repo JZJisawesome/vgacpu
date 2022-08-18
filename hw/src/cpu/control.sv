@@ -26,22 +26,21 @@ end
 
 //Next state logic
 always_comb begin
-    case (current_state)
+    /*case (current_state)
         INIT: begin
             next_state = FETCH;
         end
         FETCH: begin
-            next_state = 'x;//TODO
         end
         DECODE: begin
-            next_state = 'x;//TODO
         end
         EXECUTE: begin
-            next_state = 'x;//TODO
         end default: begin
             next_state = 'x;
         end
     endcase
+    */
+    //TODO
 end
 
 //Output logic

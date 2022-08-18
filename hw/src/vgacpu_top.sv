@@ -62,25 +62,18 @@ logic [2:0] gpu_fb_pixel;
 /* Module instantiations */
 
 //Framebuffer
-inferred_sram #(
+framebuffer #(
     .INITIALIZE_FROM_FILE(1),//TODO eventually do init this for file (maybe show some default logo/for testing)
     .FILE("src/init_fb.hex"),
-    .FILE_TYPE_BIN(1),
-    .D_WIDTH(3),
-    .TOTAL_WORDS(214 * 160),
-    .A_WIDTH(16)//We needs 16 bits of addresses to access it all
-) framebuffer (
+    .FILE_TYPE_BIN(1)
+) fb (
     .clk(clk_50),
 
-    //Port A
-    //Reading
+    //Port A (For VGA module)
     .addr_a(vga_fb_addr),
     .read_a(vga_fb_pixel),
-    //Port A writing not used
 
-    //Port B
-    //Port B reading not used
-    //Writing
+    //Port B (For rasterizer)
     .addr_b(gpu_fb_addr),
     .write_en_b(gpu_fb_write_en),
     .write_b(gpu_fb_pixel)

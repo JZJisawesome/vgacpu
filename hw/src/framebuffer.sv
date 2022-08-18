@@ -1,3 +1,10 @@
+/* framebuffer
+ * By: John Jekel
+ *
+ * Inferred SRAM module for holding the system's framebuffer
+ *
+*/
+
 /* Inferred SRAM module for a Cyclone IV FPGA
  * Thank you Recommended HDL Coding Styles doc
  * Partly borrowed from jzjcore project/other past projects
@@ -10,41 +17,34 @@
  *
 */
 
-module inferred_sram #(
+module framebuffer #(
 	parameter INITIALIZE_FROM_FILE = 0,//Whether to have default ram contents at boot
 	parameter FILE = "rom.mem",
-	parameter FILE_TYPE_BIN = 0,//Hex by default
-	parameter D_WIDTH = 8,
-	parameter TOTAL_WORDS = 0,//If 0, TOTAL_WORDS is inferred from A_WIDTH (becomes 2 ** A_WIDTH)
-	parameter A_WIDTH = 8//Must be large enough to accomodate the number of words
+	parameter FILE_TYPE_BIN = 0//Hex by default
 ) (
 	input logic clk,
 
-	//Port A
-	//Common
+	//Port A (For VGA module)
 	input logic [A_MAX:A_MIN] addr_a,
-	//Reading
 	output logic [D_MAX:D_MIN] read_a,
-	//Writing
-	input logic write_en_a,
-	input logic [D_MAX:D_MIN] write_a,
 
-	//Port B
-	//Common
+	//Port B (For rasterizer)
 	input logic [A_MAX:A_MIN] addr_b,
-	//Reading
-	output logic [D_MAX:D_MIN] read_b,
-	//Writing
 	input logic write_en_b,
 	input logic [D_MAX:D_MIN] write_b
 );
+
+//Parameters of the framebuffer
+localparam D_WIDTH = 3;//3bpp
+localparam TOTAL_WORDS = 214 * 160;//FB resolution
+localparam A_WIDTH = 16;//We needs 16 bits of addresses to access it all
 
 //Processing of parameters
 localparam D_MAX = D_WIDTH - 1;
 localparam D_MIN = 0;
 localparam A_MAX = A_WIDTH - 1;
 localparam A_MIN = 0;
-localparam int NUM_ADDR = (TOTAL_WORDS != 0) ? TOTAL_WORDS : (2 ** A_WIDTH);
+localparam int NUM_ADDR = TOTAL_WORDS;
 localparam LAST_ADDR = TOTAL_WORDS - 1;
 localparam FIRST_ADDR = 0;
 
@@ -55,9 +55,6 @@ logic [D_MAX:D_MIN] sram [LAST_ADDR:FIRST_ADDR];
 
 //Port A
 always_ff @(posedge clk) begin
-	if (write_en_a)
-		sram[addr_a] <= write_a;
-
 	read_a <= sram[addr_a];
 end
 
@@ -65,12 +62,9 @@ end
 always_ff @(posedge clk) begin
 	if (write_en_b)
 		sram[addr_b] <= write_b;
-
-	read_b <= sram[addr_b];
 end
 
 //Initialization Code
-
 initial begin
 	if (INITIALIZE_FROM_FILE)
 	begin

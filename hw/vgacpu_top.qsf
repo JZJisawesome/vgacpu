@@ -73,11 +73,12 @@ set_location_assignment PIN_88 -to buttons_async[3]
 set_location_assignment PIN_89 -to buttons_async[2]
 set_location_assignment PIN_90 -to buttons_async[1]
 set_location_assignment PIN_91 -to buttons_async[0]
+set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/main_mem.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/framebuffer.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/control.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/buttons.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/common.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/sound.sv
-set_global_assignment -name SYSTEMVERILOG_FILE src/inferred_sram.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/vgacpu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/vga.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/rasterizer.sv
