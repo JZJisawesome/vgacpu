@@ -55,13 +55,9 @@ logic [15:0] vga_fb_addr;
 logic [2:0] vga_fb_pixel;
 
 //Framebuffer-Rasterizer connections
-logic [15:0] gpu_fb_addr_a;
-logic gpu_fb_write_en_a;
-logic [2:0] gpu_fb_pixel_a;
-
-logic [15:0] gpu_fb_addr_b;
-logic gpu_fb_write_en_b;
-logic [2:0] gpu_fb_pixel_b;
+logic [15:0] gpu_fb_addr;
+logic gpu_fb_write_en;
+logic [2:0] gpu_fb_pixel;
 
 /* Module instantiations */
 
@@ -78,19 +74,16 @@ inferred_sram #(
 
     //Port A
     //Reading
-    .read_addr_a(vga_fb_addr),
+    .addr_a(vga_fb_addr),
     .read_a(vga_fb_pixel),
-    //Writing
-    .write_addr_a(gpu_fb_addr_a),
-    .write_en_a(gpu_fb_write_en_a),
-    .write_a(gpu_fb_pixel_a),
+    //Port A writing not used
 
     //Port B
     //Port B reading not used
     //Writing
-    .write_addr_b(gpu_fb_addr_b),
-    .write_en_b(gpu_fb_write_en_b),
-    .write_b(gpu_fb_pixel_b)
+    .addr_b(gpu_fb_addr),
+    .write_en_b(gpu_fb_write_en),
+    .write_b(gpu_fb_pixel)
 );
 
 //VGA Output Module
@@ -126,13 +119,9 @@ rasterizer gpu (
     .busy(gpu_busy),
 
     //Framebuffer Access
-    .fb_addr_a(gpu_fb_addr_a),
-    .fb_write_en_a(gpu_fb_write_en_a),
-    .fb_pixel_a(gpu_fb_pixel_a),
-
-    .fb_addr_b(gpu_fb_addr_b),
-    .fb_write_en_b(gpu_fb_write_en_b),
-    .fb_pixel_b(gpu_fb_pixel_b)
+    .fb_addr(gpu_fb_addr),
+    .fb_write_en(gpu_fb_write_en),
+    .fb_pixel(gpu_fb_pixel)
 );
 
 //Sound

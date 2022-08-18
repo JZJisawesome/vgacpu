@@ -19,22 +19,22 @@ module inferred_sram #(
 	parameter A_WIDTH = 8//Must be large enough to accomodate the number of words
 ) (
 	input logic clk,
-	
+
 	//Port A
+	//Common
+	input logic [A_MAX:A_MIN] addr_a,
 	//Reading
-	input logic [A_MAX:A_MIN] read_addr_a,
 	output logic [D_MAX:D_MIN] read_a,
 	//Writing
-	input logic [A_MAX:A_MIN] write_addr_a,
 	input logic write_en_a,
 	input logic [D_MAX:D_MIN] write_a,
-	
+
 	//Port B
+	//Common
+	input logic [A_MAX:A_MIN] addr_b,
 	//Reading
-	input logic [A_MAX:A_MIN] read_addr_b,
 	output logic [D_MAX:D_MIN] read_b,
 	//Writing
-	input logic [A_MAX:A_MIN] write_addr_b,
 	input logic write_en_b,
 	input logic [D_MAX:D_MIN] write_b
 );
@@ -56,17 +56,17 @@ logic [D_MAX:D_MIN] sram [LAST_ADDR:FIRST_ADDR];
 //Port A
 always_ff @(posedge clk) begin
 	if (write_en_a)
-		sram[write_addr_a] <= write_a;
+		sram[addr_a] <= write_a;
 
-	read_a <= sram[read_addr_a];
+	read_a <= sram[addr_a];
 end
 
 //Port B
 always_ff @(posedge clk) begin
 	if (write_en_b)
-		sram[write_addr_b] <= write_b;
+		sram[addr_b] <= write_b;
 
-	read_b <= sram[read_addr_b];
+	read_b <= sram[addr_b];
 end
 
 //Initialization Code

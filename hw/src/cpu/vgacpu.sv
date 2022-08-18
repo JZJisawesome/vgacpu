@@ -26,7 +26,7 @@ module vgacpu
 
 
 //TESTING
-//assign gpu_command = common::RASTER_CMD_FILL;
+assign gpu_command = common::RASTER_CMD_FILL;
 //assign gpu_colour = (3'b101;
 //assign gpu_execute_request = 1;
 //assign gpu_execute_request = 0;
@@ -49,14 +49,14 @@ assign gpu_colour = 3'b110;
 assign gpu_execute_request = 1;
 */
 
-assign gpu_command = common::RASTER_CMD_RECT;
+//assign gpu_command = common::RASTER_CMD_RECT;
 /*assign gpu_x0 = 10;
 assign gpu_y0 = 90;
 assign gpu_x1 = 204;
 assign gpu_y1 = 130;
 assign gpu_colour = 3'b110;
 */
-
+/*
 assign gpu_x1 = 214 - gpu_x0;
 assign gpu_y1 = 160 - gpu_y0;
 
@@ -70,6 +70,8 @@ always @(posedge clk) begin
         gpu_y0 <= gpu_y0 + 1;
     end
 end
+
+*/
 
 logic [27:0] colour_counter;
 assign gpu_colour = colour_counter[27:25];
