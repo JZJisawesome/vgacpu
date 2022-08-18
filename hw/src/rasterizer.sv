@@ -187,22 +187,6 @@ always_ff @(posedge rst_async, posedge clk) begin
     end
 end
 
-
-//TESTING
-//Fun test: Begin by just writing an incrementing value to incrementing addresses of the FB
-/*
-assign fb_write_en = 1;
-always_ff @(posedge rst_async, posedge clk) begin
-    if (rst_async) begin
-        fb_addr <= '0;
-        fb_pixel <= '0;
-    end else if (clk) begin
-        fb_addr <= fb_addr + 1;
-        fb_pixel <= fb_pixel + 1;
-    end
-end
-*/
-
 //Command: Rectangle
 logic rect_init;
 

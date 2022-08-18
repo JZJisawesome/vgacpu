@@ -57,8 +57,8 @@ assign gpu_y1 = 130;
 assign gpu_colour = 3'b110;
 */
 
-assign gpu_x1 = gpu_x0 + 20;
-assign gpu_y1 = gpu_y0 + 20;
+assign gpu_x1 = 214 - gpu_x0;
+assign gpu_y1 = 160 - gpu_y0;
 
 logic [23:0] divider;
 logic [7:0] x_counter, y_counter;
