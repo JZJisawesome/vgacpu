@@ -1,5 +1,5 @@
 //To use, run these commands from the /hw directory:
-//iverilog ./src/common.sv ./src/framebuffer.sv ./src/vgacpu_top.sv ./src/sound.sv ./src/rasterizer.sv ./src/vga.sv ./src/buttons.sv ./src/cpu/vgacpu.sv ./src/cpu/control.sv ./src/cpu/main_mem.sv ./tb/initial_vga_testbench.sv -g2012 -o /tmp/initial_vga_testbench.out
+//iverilog ./src/common.sv ./src/framebuffer.sv ./src/vgacpu_top.sv ./src/sound.sv ./src/rasterizer.sv ./src/vga.sv ./src/buttons.sv ./src/cpu/vgacpu.sv ./src/cpu/control.sv ./src/cpu/main_mem.sv ./src/cpu/alu.sv ./src/cpu/agu.sv ./src/cpu/reg_file.sv ./src/cpu/rf_mux.sv ./src/cpu/sp.sv ./src/cpu/fetch.sv ./src/cpu/decode.sv ./tb/initial_vga_testbench.sv -g2012 -o /tmp/initial_vga_testbench.out
 //vvp /tmp/initial_vga_testbench.out
 //gtkwave /tmp/initial_vga_testbench.vcd
 

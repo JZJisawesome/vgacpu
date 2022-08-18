@@ -12,6 +12,9 @@ module vgacpu
     input logic clk,//50MHz
     input logic rst_async,
 
+    //Button Inputs
+    input logic [3:0] buttons_sync,
+
     //CPU-GPU Interface
     output raster_command_t gpu_command,
     output logic [7:0] gpu_x0, gpu_y0, gpu_x1, gpu_y1,
@@ -24,9 +27,30 @@ module vgacpu
     output logic snd_latch_max_count//Hold for 1 clock cycle to latch the new max count
 );
 
+/* Connections */
+
+//RF IO
+logic [7:0] r_in;
+logic [7:0] r0;
+logic [7:0] r1;
+logic [7:0] r4;
+logic [7:0] r5;
+logic [7:0] r6;
+logic [7:0] r7;
+logic [7:0] rX;
+
+/* Module instantiations */
+
+//Control logic
+control ctrl (.*);
+
+//Main memory
+main_mem mem (.clk(clk));
+
+reg_file rf (.*);
 
 //TESTING
-assign gpu_command = common::RASTER_CMD_FILL;
+//assign gpu_command = common::RASTER_CMD_FILL;
 //assign gpu_colour = (3'b101;
 //assign gpu_execute_request = 1;
 //assign gpu_execute_request = 0;
@@ -73,6 +97,7 @@ end
 
 */
 
+/*
 logic [27:0] colour_counter;
 assign gpu_colour = colour_counter[27:25];
 always @(posedge clk) begin
@@ -83,5 +108,6 @@ assign gpu_execute_request = 1;
 
 assign snd_max_count = (50000000 / 1000) / 2;//1000KHz
 assign snd_latch_max_count = 0;//1;
+*/
 
 endmodule

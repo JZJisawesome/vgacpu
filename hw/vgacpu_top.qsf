@@ -73,6 +73,13 @@ set_location_assignment PIN_88 -to buttons_async[3]
 set_location_assignment PIN_89 -to buttons_async[2]
 set_location_assignment PIN_90 -to buttons_async[1]
 set_location_assignment PIN_91 -to buttons_async[0]
+set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/sp.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/rf_mux.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/reg_file.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/fetch.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/decode.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/alu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/agu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/main_mem.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/framebuffer.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/control.sv
