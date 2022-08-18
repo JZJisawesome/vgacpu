@@ -111,44 +111,37 @@ always_comb begin
             fb_write_en = nop_fb_write_en & busy;
             fb_pixel = nop_fb_pixel;
             done = nop_done;
-        end
-        common::RASTER_CMD_FILL: begin
+        end common::RASTER_CMD_FILL: begin
             fb_addr = fill_fb_addr;
             fb_write_en = fill_fb_write_en & busy;
             fb_pixel = fill_fb_pixel;
             done = fill_done;
-        end
-        common::RASTER_CMD_POINT: begin
+        end common::RASTER_CMD_POINT: begin
             fb_addr = point_fb_addr;
             fb_write_en = point_fb_write_en & busy;
             fb_pixel = point_fb_pixel;
             done = point_done;
-        end
-        common::RASTER_CMD_LINE: begin
+        end common::RASTER_CMD_LINE: begin
             fb_addr = line_fb_addr;
             fb_write_en = line_fb_write_en & busy;
             fb_pixel = line_fb_pixel;
             done = line_done;
-        end
-        common::RASTER_CMD_RECT: begin
+        end common::RASTER_CMD_RECT: begin
             fb_addr = rect_fb_addr;
             fb_write_en = rect_fb_write_en & busy;
             fb_pixel = rect_fb_pixel;
             done = rect_done;
-        end
-        common::RASTER_CMD_HLINE: begin
+        end common::RASTER_CMD_HLINE: begin
             fb_addr = hline_fb_addr;
             fb_write_en = hline_fb_write_en & busy;
             fb_pixel = hline_fb_pixel;
             done = hline_done;
-        end
-        common::RASTER_CMD_VLINE: begin
+        end common::RASTER_CMD_VLINE: begin
             fb_addr = vline_fb_addr;
             fb_write_en = vline_fb_write_en & busy;
             fb_pixel = vline_fb_pixel;
             done = vline_done;
-        end
-        default: begin
+        end default: begin
             fb_addr = 'x;
             fb_write_en = 'x;
             fb_pixel = 'x;

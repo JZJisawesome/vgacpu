@@ -126,8 +126,8 @@ May add more instructions (particularly more rendering instructions) in the futu
 [001010] | POLLBLANK        | Write 1 into r0 if in a blanking period, else write 0
 [001011] | POLLRENDERBUSY   | Write 1 into r0 if the renderer is busy writing to the framebuffer, etc 0
 [001100] | RET              | Pop 2 bytes from the stack containing the address to return to
-[001101] | JBEZ             | Jump back to the previous instruction is r0 = 0 (useful for polling)
-[001110] | JBNEZ            | Jump back to the previous instruction is r0 != 0 (useful for polling)
+[001101] | JBEZ             | Jump back to the previous instruction if r0 = 0 (useful for polling)
+[001110] | JBNEZ            | Jump back to the previous instruction if r0 != 0 (useful for polling)
 
 
 [111110] | HALT             | Spin forever
