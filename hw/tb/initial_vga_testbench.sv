@@ -1,5 +1,5 @@
 //To use, run these commands from the /hw directory:
-//iverilog ./src/common.sv ./src/vgacpu_top.sv ./src/inferred_sram.sv ./src/sound.sv ./src/rasterizer.sv ./src/vga.sv ./src/cpu/vgacpu.sv ./tb/initial_vga_testbench.sv -g2012 -o /tmp/initial_vga_testbench.out
+//iverilog ./src/common.sv ./src/vgacpu_top.sv ./src/inferred_sram.sv ./src/sound.sv ./src/rasterizer.sv ./src/vga.sv ./src/buttons.sv ./src/cpu/vgacpu.sv ./tb/initial_vga_testbench.sv -g2012 -o /tmp/initial_vga_testbench.out
 //vvp /tmp/initial_vga_testbench.out
 //gtkwave /tmp/initial_vga_testbench.vcd
 
@@ -8,6 +8,8 @@ module initial_vga_testbench;
 
 logic clk;
 logic n_rst_async;
+
+logic [3:0] buttons_async;
 
 logic vga_r, vga_g, vga_b;
 logic vga_hsync, vga_vsync;

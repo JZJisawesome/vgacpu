@@ -11,7 +11,8 @@ module vgacpu_top
     input logic clk,
     input logic n_rst_async,
 
-    //TODO button inputs
+    //Button Inputs
+    input logic [3:0] buttons_async,
 
     //VGA Outputs (640x480)
     output logic vga_r, vga_g, vga_b,
@@ -32,6 +33,9 @@ logic clk_50;
 assign clk_50 = clk;
 
 /* Connections Between CPU, Rasterizer, VGA Module, Framebuffer, Sound, etc */
+
+//Synchronized Buttons
+logic [3:0] buttons_sync;
 
 //CPU-GPU connections
 raster_command_t gpu_command;
@@ -129,7 +133,10 @@ sound snd (
     .buzzer(buzzer)
 );
 
+//Synchronizers
+buttons synchronizers (.clk(clk_50), .*);
+
 //CPU
-vgacpu cpu (.*);
+vgacpu cpu (.clk(clk_50), .*);
 
 endmodule
