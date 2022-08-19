@@ -5,4 +5,8 @@
  *
 */
 
-//TODO
+module agu (
+
+);
+
+endmodule

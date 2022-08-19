@@ -88,6 +88,9 @@ May add more instructions (particularly more rendering instructions) in the futu
 [001001] | SCALL IMM        | (Short) Unconditional jump to the address contained IMM in the current data page; current address pushed onto stack (2 bytes)
 [001010] | POLLIN IMM       | (Short) Write 1 into r0 if the IMMth input is on, else write 0 (ex. used for getting push button state)
 
+[001011] | SL IMM           | Shift bits in r0 left by IMM
+[001100] | SR IMM           | Shift bits in r0 right by IMM
+
 [100000] | 0TOX IMM         | Copy the contents of r0 to the register specified by bits [2:0] of the second byte
 [100001] | XTO0 IMM         | Copy the contents the register specified by bits [2:0] of the second byte to r0
 
@@ -97,8 +100,6 @@ May add more instructions (particularly more rendering instructions) in the futu
 [001] | CHAR rX, IMM        | Write the ASCII char in rX to the point [x0, y0] (colour chosen by IMM)
 [010] | LOAD rX, IMM        | Load the byte from the address IMM in the current data page into rX
 [011] | STORE rX, IMM       | Store the byte in rX to the address IMM in the current data page
-[100] | SL rX, IMM          | Shift bits in rX left by IMM
-[101] | SR rX, IMM          | Shift bits in rX right by IMM
 
 ##### [01] One operand
 

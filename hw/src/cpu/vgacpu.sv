@@ -6,8 +6,11 @@
 */
 
 import common::raster_command_t;//FIXME move into module scope
+import cpu_common::alu_operation_t;//FIXME move into module scope
+import cpu_common::alu_operand_t;//FIXME move into module scope
 
 module vgacpu
+    //TODO put imports here
 (
     input logic clk,//50MHz
     input logic rst_async,
@@ -27,10 +30,27 @@ module vgacpu
     output logic snd_latch_max_count//Hold for 1 clock cycle to latch the new max count
 );
 
-/* Connections */
+/* Control Lines */
 
-//RF IO
-logic [7:0] r_in;
+//Register File
+logic rf_write_en;
+
+//ALU
+alu_operation_t alu_operation;
+alu_operand_t alu_operand;
+
+/* Data Connections */
+
+//Fetch
+logic [15:0] inst;
+
+//Decode
+logic [7:0] immediate;
+
+//RF
+logic [2:0] rf_write_addr;
+logic [2:0] rX_addr;
+logic [7:0] rf_in;
 logic [7:0] r0;
 logic [7:0] r1;
 logic [7:0] r4;
@@ -38,6 +58,12 @@ logic [7:0] r5;
 logic [7:0] r6;
 logic [7:0] r7;
 logic [7:0] rX;
+
+//ALU
+logic [7:0] alu_result;
+
+//SP
+logic [13:0] sp_addr;
 
 /* Module instantiations */
 
@@ -47,7 +73,24 @@ control ctrl (.*);
 //Main memory
 main_mem mem (.clk(clk));
 
+//Register File and input mux
+rf_mux mux (.*);
 reg_file rf (.*);
+
+//ALU
+alu the_alu (.*);
+
+//Fetch unit
+fetch ifetch (.*);
+
+//Decode unit
+decode dec (.*);
+
+//Stack pointer
+sp stack_pointer (.*);
+
+//AGU
+agu addr_gen_unit (.*);
 
 //TESTING
 //assign gpu_command = common::RASTER_CMD_FILL;

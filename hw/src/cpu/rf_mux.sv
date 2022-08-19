@@ -5,4 +5,12 @@
  *
 */
 
-//TODO
+module rf_mux (
+
+    //TODO inputs
+
+    output [7:0] rf_in
+
+);
+
+endmodule

@@ -6,7 +6,7 @@
 */
 
 module vgacpu_top
-    import common::raster_command_t;//TEMPORARY just for testing
+    import common::raster_command_t;
 (
     input logic clk,
     input logic n_rst_async,

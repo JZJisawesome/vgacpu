@@ -5,4 +5,13 @@
  *
 */
 
-//TODO
+module sp (
+    input clk,
+
+    //TODO control signals: increment, decrement, stay the same, etc
+
+    output [13:0] sp_addr
+
+);
+
+endmodule

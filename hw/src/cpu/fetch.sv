@@ -5,4 +5,10 @@
  *
 */
 
-//TODO
+module fetch (
+    input clk,
+    input rst_async
+
+);
+
+endmodule
