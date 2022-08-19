@@ -6,8 +6,7 @@
 */
 
 import common::raster_command_t;//FIXME move into module scope
-import cpu_common::alu_operation_t;//FIXME move into module scope
-import cpu_common::alu_operand_t;//FIXME move into module scope
+import cpu_common::*;//FIXME move into module scope
 
 module vgacpu
     //TODO put imports here
@@ -39,6 +38,9 @@ logic rf_write_en;
 alu_operation_t alu_operation;
 alu_operand_t alu_operand;
 
+//RF Mux
+rf_mux_src_t rf_mux_src;
+
 /* Data Connections */
 
 //Fetch
@@ -64,6 +66,9 @@ logic [7:0] alu_result;
 
 //SP
 logic [13:0] sp_addr;
+
+//Memory
+logic [7:0] mem_data_read;
 
 /* Module instantiations */
 

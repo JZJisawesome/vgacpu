@@ -20,39 +20,33 @@
 module main_mem #(
 	parameter INITIALIZE_FROM_FILE = 0,//Whether to have default ram contents at boot
 	parameter FILE = "rom.mem",
-	parameter FILE_TYPE_BIN = 0//Hex by default
+	parameter FILE_TYPE_BIN = 0,//Hex by default
+	parameter A_WIDTH = 13,
+	parameter TOTAL_WORDS = 2 ** A_WIDTH
 ) (
 	input logic clk,
 
-	//Port A
-	//Common
-	input logic [A_MAX:A_MIN] addr_a,
-	//Reading
-	output logic [15:0] read_a,
-	//Writing
-	input logic write_en_a,
-	input logic [1:0] write_mask_a,
-	input logic [15:0] write_a,
+	//Instruction Port
+	input logic [A_MAX:A_MIN] mem_inst_addr,
+	output logic [15:0] mem_instr,
 
-	//Port B
+	//Data Port
 	//Common
-	input logic [A_MAX:A_MIN] addr_b,
+	input logic [A_MAX:A_MIN] mem_data_addr,
 	//Reading
-	output logic [15:0] read_b,
+	output logic [15:0] mem_data_read,
 	//Writing
-	input logic write_en_b,
-	input logic [1:0] write_mask_b,
-	input logic [15:0] write_b
+	input logic mem_data_write_en,
+	input logic [1:0] mem_data_write_mask,
+	input logic [15:0] mem_data_write
 );
 
 //Parameters
-localparam A_WIDTH = 13;
 
 //Processing of parameters
 localparam A_MAX = A_WIDTH - 1;
 localparam A_MIN = 0;
-localparam int NUM_ADDR = 2 ** A_WIDTH;
-localparam LAST_ADDR = NUM_ADDR - 1;
+localparam LAST_ADDR = TOTAL_WORDS - 1;
 localparam FIRST_ADDR = 0;
 
 //The actual inferred SRAM
@@ -60,28 +54,21 @@ logic [1:0][7:0] sram [LAST_ADDR:FIRST_ADDR];
 
 //Address latching and read/write logic for ports A and B
 
-//Port A
+//Instruction Port
 always_ff @(posedge clk) begin
-	if (write_en_a) begin
-		if (write_mask_a[0])
-            sram[addr_a][0] <= write_a[7:0];
-		if (write_mask_a[1])
-            sram[addr_a][1] <= write_a[15:8];
-    end
-
-	read_a <= sram[addr_a];
+	mem_instr <= sram[mem_inst_addr];
 end
 
-//Port B
+//Data Port
 always_ff @(posedge clk) begin
-	if (write_en_b) begin
-		if (write_mask_b[0])
-            sram[addr_b][0] <= write_b[7:0];
-		if (write_mask_b[1])
-            sram[addr_b][1] <= write_b[15:8];
+	if (mem_data_write_en) begin
+		if (mem_data_write_mask[0])
+            sram[mem_data_addr][0] <= mem_data_write[7:0];
+		if (mem_data_write_mask[1])
+            sram[mem_data_addr][1] <= mem_data_write[15:8];
     end
 
-	read_b <= sram[addr_b];
+	mem_data_read <= sram[mem_data_addr];
 end
 
 //Initialization Code
