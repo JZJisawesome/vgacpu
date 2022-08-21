@@ -14,4 +14,6 @@ package cpu_common;
     typedef enum {SP_NOP, SP_INC_1, SP_INC_2, SP_DEC_1, SP_DEC_2} sp_operation_t;
 
     typedef enum {FETCH_NOP, FETCH_INC_PC, FETCH_RET} fetch_operation_t;
+
+    typedef enum {AGU_PUSH_POP, AGU_SHORT_IMM} agu_operation_t;
 endpackage

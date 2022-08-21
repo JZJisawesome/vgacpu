@@ -133,3 +133,36 @@ May add more instructions (particularly more rendering instructions) in the futu
 
 [111110] | HALT             | Spin forever
 [111111] | RESET            | Reset the system
+
+## Implementation Brainstorming/Details
+
+### Control Signals For Modules
+
+#### Register File
+rf_write_en | Write enable
+
+#### ALU
+
+alu_operation | ALU operation
+alu_operand   | ALU second operand
+
+#### RF Mux
+rf_mux_src    | Source for register file input
+
+#### Stack Pointer
+sp_operation  | The operation to perform with the stack pointer
+
+#### Fetch Unit/PC
+fetch_operation | What to do with the PC (after which point the inst is fetched)
+
+#### Decode Unit
+decode_en       | Perform the decode (1) or hold the prev output (0)
+
+#### AGU
+agu_operation   | Type of mem address to generate
+
+#### Page Register
+pr_write_en     | Copy the lower 6 bits of the immediate to the register, else hold the prev value
+
+#### Memory
+mem_data_write_en | Write data to memory or not

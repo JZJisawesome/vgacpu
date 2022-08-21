@@ -41,27 +41,27 @@ always_comb begin
     case (inst[1:0])
         2'b11: begin//We have to deal with the 0TOX and XTO0 instructions
             if (inst[7:2] == 6'b100000) begin//0TOX
-                rf_write_addr_internal <= inst[10:8];
-                rX_addr_internal <= 0;
+                rf_write_addr_internal = inst[10:8];
+                rX_addr_internal = 0;
             end else if (inst[7:2] == 6'b100001) begin//XTO0
-                rf_write_addr_internal <= 0;
-                rX_addr_internal <= inst[10:8];
+                rf_write_addr_internal = 0;
+                rX_addr_internal = inst[10:8];
             end else begin
-                rf_write_addr_internal <= 'x;
-                rX_addr_internal <= 'x;
+                rf_write_addr_internal = 'x;
+                rX_addr_internal = 'x;
             end
         end 2'b10: begin;//The register to read, or to write, is always in inst[7:5]
-            rf_write_addr_internal <= inst[7:5];
-            rX_addr_internal <= inst[7:5];
+            rf_write_addr_internal = inst[7:5];
+            rX_addr_internal = inst[7:5];
         end 2'b01: begin//The register to read, or to write, is always in inst[7:5]
-            rf_write_addr_internal <= inst[7:5];
-            rX_addr_internal <= inst[7:5];
+            rf_write_addr_internal = inst[7:5];
+            rX_addr_internal = inst[7:5];
         end 2'b00: begin//No register accesses in this instruction type
-            rf_write_addr_internal <= 'x;
-            rX_addr_internal <= 'x;
+            rf_write_addr_internal = 'x;
+            rX_addr_internal = 'x;
         end default: begin
-            rf_write_addr_internal <= 'x;
-            rX_addr_internal <= 'x;
+            rf_write_addr_internal = 'x;
+            rX_addr_internal = 'x;
         end
     endcase
 end

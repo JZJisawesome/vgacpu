@@ -8,12 +8,6 @@
 /* Inferred SRAM module for a Cyclone IV FPGA
  * Thank you Recommended HDL Coding Styles doc
  * Partly borrowed from jzjcore project/other past projects
-
- * Note: The Cyclone IV's SRAM supports masking bytes from being written
- * The original version of this module exposed this behaviour since, in jzjcore,
- * the memory was always known to be 32 bits wide.
- * Here however this is of less utility, and we can't really implement it anyways
- * since we don't know the D_WIDTH of the sram ahead of time; we are given it as a parameter
  *
 */
 

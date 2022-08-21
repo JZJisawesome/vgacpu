@@ -50,8 +50,11 @@ always_comb begin
             else
                 next_state = IDLE;
         end BYTE_1: begin
+            next_state = IDLE;//TODO
         end BYTE_2: begin
+            next_state = IDLE;//TODO
         end FINISH: begin
+            next_state = IDLE;//TODO
         end
     endcase
 end
@@ -59,34 +62,32 @@ end
 //Actual fetch logic based on current state
 always_comb begin
     case (current_state)
-        INIT: begin
+        IDLE: begin
             mem_inst_addr = 'x;
         end
         BYTE_1: begin
             mem_inst_addr = pc[13:1];
         end
         BYTE_2: begin
-
+            mem_inst_addr = 'x;//TODO
         end
         FINISH: begin
+            mem_inst_addr = 'x;//TODO
         end default: begin
-
+            mem_inst_addr = 'x;//TODO
         end
     endcase
 end
 always_ff @(posedge clk) begin
     case (current_state)
-        INIT: begin
-            //Do nothing
+        IDLE: begin
         end
         BYTE_1: begin
-            mem_inst_addr = pc[13:1];
         end
-        DECODE: begin
+        BYTE_2: begin
 
         end
-        EXECUTE: begin
-
+        FINISH: begin
         end default: begin
 
         end

@@ -73,6 +73,7 @@ set_location_assignment PIN_88 -to buttons_async[3]
 set_location_assignment PIN_89 -to buttons_async[2]
 set_location_assignment PIN_90 -to buttons_async[1]
 set_location_assignment PIN_91 -to buttons_async[0]
+set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/pr.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/cpu_common.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/sp.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/cpu/rf_mux.sv

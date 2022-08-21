@@ -9,7 +9,7 @@ module control (
     input logic clk,
     input logic rst_async,
 
-    //Input signals to decide state transitions
+    //Input signals to decide state transitions and outputs
     //Fetch Unit
     input logic fetch_complete
 

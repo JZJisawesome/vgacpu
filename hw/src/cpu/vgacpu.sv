@@ -17,14 +17,14 @@ module vgacpu
     //Button Inputs
     input logic [3:0] buttons_sync,
 
-    //CPU-GPU Interface
+    //CPU-GPU Interface//TODO turn this into an actual systemverilog interface
     output raster_command_t gpu_command,
     output logic [7:0] gpu_x0, gpu_y0, gpu_x1, gpu_y1,
     output logic [2:0] gpu_colour,
     output logic gpu_execute_request,//Hold for 1 clock cycle to begin execution; DO NOT ACTIVATE WHILE BUSY
     input logic gpu_busy,
 
-    //CPU-Sound Interface
+    //CPU-Sound Interface//TODO turn this into an actual systemverilog interface
     output logic [25:0] snd_max_count,//Enough bits for frequencies as low as < 1hz
     output logic snd_latch_max_count//Hold for 1 clock cycle to latch the new max count
 );
@@ -49,6 +49,15 @@ fetch_operation_t fetch_operation;
 
 //Decode
 logic decode_en;
+
+//Page Register
+logic pr_write_en;
+
+//Memory
+logic mem_data_write_en;
+
+//AGU
+agu_operation_t agu_operation;
 
 /* Signals To Control Logic */
 
@@ -85,7 +94,9 @@ logic [13:0] sp_addr;
 //Memory
 logic [12:0] mem_inst_addr;
 logic [15:0] mem_instr;
+logic [12:0] mem_data_addr;
 logic [7:0] mem_data_read;
+logic [7:0] mem_data_write;
 
 /* Module instantiations */
 
@@ -93,7 +104,14 @@ logic [7:0] mem_data_read;
 control ctrl (.*);
 
 //Main memory
-main_mem mem (.clk(clk));
+main_mem mem (
+    .*,
+
+    //We only ever write the lower byte (at least so far)
+    .mem_data_read(mem_data_read),
+    .mem_data_write({8'bx, mem_data_write}),
+    .mem_data_write_mask(2'b01)
+);
 
 //Register File and input mux
 rf_mux mux (.*);
