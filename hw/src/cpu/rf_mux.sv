@@ -5,7 +5,7 @@
  *
 */
 
-import cpu_common::*;//Man iscarus verilog is pickey about this//TODO only import what is necessary and only
+import cpu_common::*;//Man iscarus verilog is pickey about this//TODO only import what is necessary and only in the module scope
 
 module rf_mux
 (
@@ -25,10 +25,10 @@ module rf_mux
 //The multiplexer
 always_comb begin
     case (rf_mux_src)
-        RF_MUX_IMM: rf_in = immediate;
-        RF_MUX_R0:  rf_in = r0;
-        RF_MUX_ALU: rf_in = alu_result;
-        RF_MUX_MEM: rf_in = mem_data_read;
+        cpu_common::RF_MUX_IMM: rf_in = immediate;
+        cpu_common::RF_MUX_R0:  rf_in = r0;
+        cpu_common::RF_MUX_ALU: rf_in = alu_result;
+        cpu_common::RF_MUX_MEM: rf_in = mem_data_read;
     endcase
 end
 

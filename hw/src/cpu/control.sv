@@ -1,18 +1,23 @@
 /* control
  * By: John Jekel
  *
- * Control logic for cpu (moore machine)
+ * Control logic for cpu (mealey machine)
  *
 */
 
 module control (
     input logic clk,
-    input logic rst_async
+    input logic rst_async,
 
-    //TODO figure out other signals
+    //Input signals to decide state transitions
+    //Fetch Unit
+    input logic fetch_complete
+
+    //Control Lines
+    //TODO
 );
 
-typedef enum {INIT, FETCH, DECODE, EXECUTE} control_state_t;
+typedef enum {INIT, FETCH, DECODE, EXECUTE} control_state_t;//TODO additional states for different memory classes
 control_state_t current_state;
 control_state_t next_state;
 
@@ -26,21 +31,21 @@ end
 
 //Next state logic
 always_comb begin
-    /*case (current_state)
+    //TODO actually transition based on signals and not just in a fixed loop
+    case (current_state)
         INIT: begin
             next_state = FETCH;
-        end
-        FETCH: begin
-        end
-        DECODE: begin
-        end
-        EXECUTE: begin
-        end default: begin
-            next_state = 'x;
+        end FETCH: begin
+            if (fetch_complete)
+                next_state = DECODE;
+            else
+                next_state = FETCH;
+        end DECODE: begin
+            next_state = EXECUTE;
+        end EXECUTE: begin
+            next_state = FETCH;
         end
     endcase
-    */
-    //TODO
 end
 
 //Output logic

@@ -12,7 +12,7 @@ module vgacpu
     //TODO put imports here
 (
     input logic clk,//50MHz
-    input logic rst_async,
+    input logic rst_async,//TODO this async reset should be synchronized!!!
 
     //Button Inputs
     input logic [3:0] buttons_sync,
@@ -41,6 +41,20 @@ alu_operand_t alu_operand;
 //RF Mux
 rf_mux_src_t rf_mux_src;
 
+//SP
+sp_operation_t sp_operation;
+
+//Fetch Unit
+fetch_operation_t fetch_operation;
+
+//Decode
+logic decode_en;
+
+/* Signals To Control Logic */
+
+//Fetch Unit
+logic fetch_complete;
+
 /* Data Connections */
 
 //Fetch
@@ -48,6 +62,7 @@ logic [15:0] inst;
 
 //Decode
 logic [7:0] immediate;
+logic [1:0] inst_type;
 
 //RF
 logic [2:0] rf_write_addr;
@@ -68,6 +83,8 @@ logic [7:0] alu_result;
 logic [13:0] sp_addr;
 
 //Memory
+logic [12:0] mem_inst_addr;
+logic [15:0] mem_instr;
 logic [7:0] mem_data_read;
 
 /* Module instantiations */
