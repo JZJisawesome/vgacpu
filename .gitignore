@@ -13,6 +13,7 @@ hw/db
 hw/*.qws
 *.o
 *.bin
+*obj_dir*
 
 #Other things
 *.kate-swp
