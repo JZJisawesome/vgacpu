@@ -19,10 +19,6 @@ module control
     //Register File
     output logic rf_write_en,
 
-    //ALU
-    output alu_operation_t alu_operation,
-    output alu_operand_t alu_operand,
-
     //RF Mux
     output rf_mux_src_t rf_mux_src,
 

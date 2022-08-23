@@ -6,6 +6,8 @@
 */
 
 package cpu_common;
+    typedef enum {CORE_REGULAR, CORE_NOP, CORE_HALT, CORE_RESET} core_special_operation_t;//TODO use for nop, halt, reset
+
     typedef enum {ALU_ADD, ALU_SUB, ALU_AND, ALU_OR, ALU_XOR, ALU_MUL, ALU_SR, ALU_SL} alu_operation_t;
     typedef enum {ALU_RX, ALU_IMMEDIATE} alu_operand_t;
 

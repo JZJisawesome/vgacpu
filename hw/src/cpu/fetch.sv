@@ -38,7 +38,7 @@ mem_fetch_state_t next_state;
 //State transition logic
 always_ff @(posedge clk, posedge rst_async) begin
     if (rst_async)
-        current_state <= BYTE_1_PREP;
+        current_state <= BYTE_1_PREP;//We need to fetch the first byte at the beginning
     else if (clk)
         current_state <= next_state;
 end
@@ -143,7 +143,7 @@ logic [13:0] pc;
 
 always_ff @(posedge clk, posedge rst_async) begin
     if (rst_async) begin
-        pc <= 1;
+        pc <= '0;
         pc_changed <= '0;
     end else if (clk) begin
 

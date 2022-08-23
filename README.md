@@ -76,6 +76,8 @@ May add more instructions (particularly more rendering instructions) in the futu
 
 ##### [11] Other 2-byte
 
+TODO subdivide these instructions better
+
 [000000] | PAGE IMM         | Set the current data page to the lower 6 bits in IMM
 [000001] | SJUMP IMM        | (Short) Unconditional jump to the address IMM in the current data page
 [000010] | SJLT IMM         | (Short) Conditional jump if r0 < r1 to the address IMM in the current data page
@@ -88,11 +90,11 @@ May add more instructions (particularly more rendering instructions) in the futu
 [001001] | SCALL IMM        | (Short) Unconditional jump to the address contained IMM in the current data page; current address pushed onto stack (2 bytes)
 [001010] | POLLIN IMM       | (Short) Write 1 into r0 if the IMMth input is on, else write 0 (ex. used for getting push button state)
 
-[001011] | SL IMM           | Shift bits in r0 left by IMM
-[001100] | SR IMM           | Shift bits in r0 right by IMM
-
 [100000] | 0TOX IMM         | Copy the contents of r0 to the register specified by bits [2:0] of the second byte
 [100001] | XTO0 IMM         | Copy the contents the register specified by bits [2:0] of the second byte to r0
+
+[110000] | SL IMM           | Shift bits in r0 left by IMM
+[110001] | SR IMM           | Shift bits in r0 right by IMM
 
 ##### [10] 2-byte
 
@@ -113,6 +115,8 @@ May add more instructions (particularly more rendering instructions) in the futu
 [111] | MUL rX              | Multiply the register rX with r0 and store (the lower 8 bits of the result) in r0
 
 ##### [00] No operands
+
+TODO subdivide these instructions better
 
 [000000] | NOP              | No operation
 [000001] | ENVGA            | Enable VGA output hardware (not the framebuffer, which is always available); disabled at reset
