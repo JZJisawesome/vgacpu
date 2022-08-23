@@ -24,6 +24,9 @@ module vgacpu
 
 /* Control Lines */
 
+//Core/Control Logic
+core_special_operation_t core_special_op;
+
 //Register File
 logic rf_write_en;
 
@@ -65,6 +68,7 @@ logic [15:0] inst;
 //Decode
 logic [7:0] immediate;
 logic [1:0] inst_type;
+logic [2:0] inst_subtype;
 
 //RF
 logic [2:0] rf_write_addr;
@@ -128,6 +132,10 @@ sp stack_pointer (.*);
 
 //AGU
 agu addr_gen_unit (.*);
+
+/* Simple connections to external modules */
+
+//assign snd_max_count = {3'b0, r5, r4, 7'b0};//Balance between granularity and minimum frequency
 
 //TESTING
 assign gpu_if.command = common::RASTER_CMD_FILL;

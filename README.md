@@ -60,15 +60,15 @@ ps: Data page register 6 bits
 #### Encoding
 
 Byte 0: 76543210
+
 Bits [1:0] encodes the instruction format
 0 means no-operand instruction (bits 7:2 are the opcode)
-1 means 1-operand instruction bits 4:2 are the opcode, bits 7:5 is the operand
-2 means 2-byte instruction: bits 4:2 are the opcode, bits 7:5 is the operand, second byte is for instruction-specific use
-3 means other 2-byte instructions: bits 7:2 are the opcode, second byte is for instruction-specific use
+1 means 1-operand instruction bits 4:2 are the opcode subtype, bits 7:5 is the operand
+2 means 2-byte instruction: bits 4:2 are the opcode subtype, bits 7:5 is the operand, second byte is for instruction-specific use
+3 means other 2-byte instructions: bits 7:2 are the opcode subtype, second byte is for instruction-specific use
 0 means 0, 1 means 1
 If 1 operand,
 If no operands, bits 7:1 are the opcode
-
 
 #### Instruction Summary
 
@@ -88,10 +88,7 @@ TODO subdivide these instructions better
 [000111] | LINE IMM         | Draw a line between the coordinates [x0, y0] and [x1, y1] where the lowest 3 bits of IMM contain the colour
 [001000] | WAIT IMM         | Wait IMM number of clock cycles
 [001001] | SCALL IMM        | (Short) Unconditional jump to the address contained IMM in the current data page; current address pushed onto stack (2 bytes)
-[001010] | POLLIN IMM       | (Short) Write 1 into r0 if the IMMth input is on, else write 0 (ex. used for getting push button state)
-
-[100000] | 0TOX IMM         | Copy the contents of r0 to the register specified by bits [2:0] of the second byte
-[100001] | XTO0 IMM         | Copy the contents the register specified by bits [2:0] of the second byte to r0
+[001010] | POLLIN IMM       | (Short) Write 1 into r0 if the IMMth input is on, else write 0 (ex. used for getting push button state)s
 
 [110000] | SL IMM           | Shift bits in r0 left by IMM
 [110001] | SR IMM           | Shift bits in r0 right by IMM
@@ -105,8 +102,10 @@ TODO subdivide these instructions better
 
 ##### [01] One operand
 
-[000] | PUSH rX             | Push rX onto the stack
-[001] | POP rX              | Pop a byte from the stack into rX
+TODO swap push and pop with 0TOX and XTO0???
+
+[000] | 0TOX IMM            | Copy the contents of r0 to rX
+[001] | XTO0 IMM            | Copy the contents rX to r0
 [010] | ADD rX              | Add the register rX to r0 and store in r0
 [011] | SUB rX              | Sub the register rX from r0 and store in r0
 [100] | AND rX              | And the register rX with r0 and store in r0
@@ -116,27 +115,40 @@ TODO subdivide these instructions better
 
 ##### [00] No operands
 
-TODO subdivide these instructions better
+###### [000] External Devices
 
-[000000] | NOP              | No operation
-[000001] | ENVGA            | Enable VGA output hardware (not the framebuffer, which is always available); disabled at reset
-[000010] | TONE             | Play the frequency contained in r5 (high bits) and r4 (low bits) multiplied by 2
-[000011] | NOTONE           | Stop playing a tone
-[000100] | JUMP             | (LONG) Unconditional jump to the address contained in r7 and r6
-[000101] | JLT              | (LONG) Conditional jump if r0 < r1 to the address contained in r7 and r6
-[000110] | JEQ              | (LONG) Conditional jump if r0 = r1 to the address contained in r7 and r6
-[000111] | JGT              | (LONG) Conditional jump if r0 > r1 to the address contained in r7 and r6
-[001000] | LCALL            | (LONG) Unconditional jump to the address contained in r7 and r6; current address pushed onto stack (2 bytes)
-[001001] | LOGO             | Write the vgacpu logo to the framebuffer
-[001010] | POLLBLANK        | Write 1 into r0 if in a blanking period, else write 0
-[001011] | POLLRENDERBUSY   | Write 1 into r0 if the renderer is busy writing to the framebuffer, etc 0
-[001100] | RET              | Pop 2 bytes from the stack containing the address to return to
-[001101] | JBEZ             | Jump back to the previous instruction if r0 = 0 (useful for polling)
-[001110] | JBNEZ            | Jump back to the previous instruction if r0 != 0 (useful for polling)
+[000] | ENVGA            | Enable VGA output hardware (not the framebuffer, which is always available); disabled at reset
+[001] | LOGO             | Write the vgacpu logo to the framebuffer
 
+[100] | POLLBLANK        | Write 1 into r0 if in a blanking period, else write 0
+[101] | POLLRENDERBUSY   | Write 1 into r0 if the renderer is busy writing to the framebuffer, etc 0
 
-[111110] | HALT             | Spin forever
-[111111] | RESET            | Reset the system
+[110] | NOTONE           | Stop playing a tone
+[111] | TONE             | Play the tone contained in r5 (high bits) and r4 (low bits) (195312.5 / desired_freq) //TODO Adjust this to what it ends up being
+
+###### [001] Control Transfer
+
+[000] | RET              | Pop 2 bytes from the stack containing the address to return to
+[001] | LCALL            | (LONG) Unconditional jump to the address contained in r7 and r6; current address pushed onto stack (2 bytes)
+
+[010] | JUMP             | (LONG) Unconditional jump to the address contained in r7 and r6
+
+[011] | JLT              | (LONG) Conditional jump if r0 < r1 to the address contained in r7 and r6
+[100] | JEQ              | (LONG) Conditional jump if r0 = r1 to the address contained in r7 and r6
+[101] | JGT              | (LONG) Conditional jump if r0 > r1 to the address contained in r7 and r6
+[110] | JBEZ             | Jump back to the previous instruction if r0 == 0 (useful for polling)
+[111] | JBNEZ            | Jump back to the previous instruction if r0 != 0 (useful for polling)
+
+###### [100] Memory Access
+
+[000] | PUSH             | Push r0 onto the stack
+[001] | POP              | Pop a byte from the stack into r0
+
+###### [111] Special
+
+[000] | NOP              | No operation
+[001] | HALT             | Spin forever
+[111] | RESET            | Reset the system
 
 ## Implementation Brainstorming/Details
 

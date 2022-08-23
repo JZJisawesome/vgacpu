@@ -146,14 +146,19 @@ always_ff @(posedge clk, posedge rst_async) begin
         pc <= '0;
         pc_changed <= '0;
     end else if (clk) begin
-
-        if (fetch_operation == cpu_common::FETCH_INC_PC) begin
-            if (inst[1])//Current instruction is 2 bytes
-                pc <= pc + 2;//Skip past both bytes
-            else
-                pc <= pc + 1;//Just skip past the one
-        end
+        case (fetch_operation)
+            cpu_common::FETCH_NOP: begin
+                if (fetch_complete)
+                    pc_changed <= 0;
+            end cpu_common::FETCH_INC_PC: begin
+                if (inst[1])//Current instruction is 2 bytes
+                    pc <= pc + 2;//Skip past both bytes
+                else
+                    pc <= pc + 1;//Just skip past the one
+                pc_changed <= 1;
+            end
         //TODO handle other operations
+        endcase
     end
 end
 

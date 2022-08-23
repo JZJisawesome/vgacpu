@@ -12,6 +12,10 @@ module control
     input logic rst_async,
 
     //Input signals to decide state transitions and outputs
+    input logic [1:0] inst_type,
+    input logic [2:0] inst_subtype,
+    input core_special_operation_t core_special_op,
+
     //Fetch Unit
     input logic fetch_complete,
 
@@ -62,7 +66,13 @@ always_comb begin
         end DECODE: begin//The decode unit always takes exactly 1 clock cycle
             next_state = EXECUTE;
         end EXECUTE: begin
-            next_state = FETCH;
+            /*
+            if (inst_type == 2'b01)
+                next_state = FETCH;//All of this class of instructions take only 1 clock cycle
+            else
+                next_state = control_state_t'('x);//TODO number of cycles/the states that occur variy based on the instruction
+            */
+            next_state = FETCH;//TESTING
         end
     endcase
 end
@@ -78,30 +88,27 @@ always_comb begin
         FETCH: begin
             rf_write_en = 0;
             decode_en = fetch_complete;//Decode the instruction as we make the transition to decode; then from decode we decide what execute state to go to
-            //rf_mux_src = 'x;
             //sp_operation = 0;
             fetch_operation = cpu_common::FETCH_NOP;
-            //alu_operation = 'x;
-            //alu_operand = 'x;
             pr_write_en = 0;
+            rf_write_en = 0;
         end DECODE: begin
             rf_write_en = 0;
             decode_en = 'x;//Already decoded the instruction opon the transition to this state; decoding things again or not won't matter
             //rf_mux_src = 'x;
             //sp_operation = 0;
             fetch_operation = cpu_common::FETCH_NOP;
-            //alu_operation = 'x;
-            //alu_operand = 'x;
             pr_write_en = 0;
+            rf_write_en = 0;
         end EXECUTE: begin
             rf_write_en = 'x;//TODO
             decode_en = 0;
             //rf_mux_src = 'x;//TODO
             //sp_operation = 'x;//TODO
             fetch_operation = cpu_common::FETCH_INC_PC;//TODO this must change for branches/jumps/etc
-            //alu_operation = //TODO
-            //alu_operand = //TODO
             pr_write_en = 'x;//TODO
+            //rf_write_en = inst_type == 2'b01;//TODO handle other classes of instrucitons (this is just temporary, only handling some)
+            rf_write_en = inst_type == 2'b01 | inst_type == 2'b10;//TESTING
         end default: begin
             rf_write_en = 'x;
             decode_en = 'x;
@@ -110,9 +117,8 @@ always_comb begin
 
             //fetch_operation = fetch_operation_t'('x);//iverilog dosn't support this
             fetch_operation = cpu_common::FETCH_NOP;//Not ideal...
-            //alu_operation = 'x;
-            //alu_operand = 'x;
             pr_write_en = 'x;
+            rf_write_en = 'x;
         end
     endcase
 end

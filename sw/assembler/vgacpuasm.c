@@ -59,7 +59,7 @@ typedef struct inst_t {
 
 /* Variables */
 
-static const inst_lookup_t inst_lookup_table [NUM_INSTRUCTIONS] = {
+static const inst_lookup_t inst_lookup_table [NUM_INSTRUCTIONS] = {//TODO update these to match the new readme
     //Type 3
     {.str = "page",                 .opcode = 0b000000, .type = 3},
     {.str = "sjump",                .opcode = 0b000001, .type = 3},
