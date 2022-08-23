@@ -19,9 +19,6 @@ module control
     //Register File
     output logic rf_write_en,
 
-    //RF Mux
-    output rf_mux_src_t rf_mux_src,
-
     //SP
     output sp_operation_t sp_operation,
 

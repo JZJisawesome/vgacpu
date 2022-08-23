@@ -16,6 +16,7 @@ module rf_mux
     input logic [7:0] r0,
     input logic [7:0] alu_result,
     input logic [7:0] mem_data_read,
+    //TODO add rX, others
 
     //Output to register file
     output logic [7:0] rf_in

@@ -27,14 +27,19 @@ module decode
 
     //ALU
     output alu_operation_t alu_operation,
-    output alu_operand_t alu_operand
+    output alu_operand_t alu_operand,
+
+    //RF Mux
+    output rf_mux_src_t rf_mux_src
 
     //TODO signals to control logic
 );
 
+//Logic to latch the decoded result
 logic [2:0] rf_write_addr_internal;
 logic [2:0] rX_addr_internal;
 alu_operation_t alu_operation_internal;
+rf_mux_src_t rf_mux_src_internal;
 
 always_ff @(posedge clk) begin//The decode step takes 1 clock cycle
     if (decode_en) begin
@@ -42,6 +47,8 @@ always_ff @(posedge clk) begin//The decode step takes 1 clock cycle
         inst_type <= inst[1:0];
         rf_write_addr <= rf_write_addr_internal;
         rX_addr <= rX_addr_internal;
+        alu_operation <= alu_operation_internal;
+        rf_mux_src <= rf_mux_src_internal;
     end
 end
 
@@ -60,7 +67,7 @@ always_comb begin
                 rf_write_addr_internal = 'x;
                 rX_addr_internal = 'x;
             end
-        end 2'b10: begin;//The register to read, or to write, is always in inst[7:5]
+        end 2'b10: begin//The register to read, or to write, is always in inst[7:5]
             rf_write_addr_internal = inst[7:5];
             rX_addr_internal = inst[7:5];
         end 2'b01: begin//The register to read, or to write, is always in inst[7:5]
@@ -77,9 +84,6 @@ always_comb begin
                 end
             endcase
         end 2'b00: begin//No register accesses in this instruction type
-            rf_write_addr_internal = 'x;
-            rX_addr_internal = 'x;
-        end default: begin
             rf_write_addr_internal = 'x;
             rX_addr_internal = 'x;
         end
@@ -99,5 +103,28 @@ always_comb begin
         3'b111: alu_operation_internal = cpu_common::ALU_MUL;//XXX 111 01 is MUL
     endcase
 end
+//TODO handle the operand too
+
+//RF Mux Decoder
+always_comb begin
+    case (inst[1:0])
+        2'b11: begin//TODO will need to handle xto0, 0tox, etc
+            rf_mux_src_internal = 'x;//TODO
+        end 2'b10: begin
+            rf_mux_src_internal = 'x;//TODO
+        end 2'b01: begin
+            case (inst[4:2])
+                3'b000: rf_mux_src_internal = 'x;//We don't write to any registers for PUSH
+                3'b001: rf_mux_src_internal = cpu_common::RF_MUX_MEM;//POP
+                3'b010, 3'b011, 3'b100, 3'b101, 3'b110, 3'b111: rf_mux_src_internal = cpu_common::RF_MUX_ALU;//ALU operations
+            endcase
+        end 2'b00: begin//TODO will need to handle the polling commands, etc
+            rf_mux_src_internal = 'x;//TODO
+        end
+    endcase
+end
+
+//Noice decode for debugging puposes
+//TODO
 
 endmodule
