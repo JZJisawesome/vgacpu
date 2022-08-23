@@ -55,7 +55,7 @@ always_comb begin
             next_state = BYTE_2;
         end BYTE_2: begin
             if (pc[0]) begin
-                if (mem_instr[9] == 1)//This is a type 2 or type 3 instruction, so it is 2 bytes
+                if (mem_instr[9])//This is a type 2 or type 3 instruction, so it is 2 bytes
                     next_state = FINISH;//Misaligned, so we need to fetch the 2nd byte
                 else
                     next_state = IDLE;//Only 1 byte, no need to fetch a second one
@@ -67,8 +67,6 @@ always_comb begin
         end
     endcase
 end
-
-assign fetch_complete = current_state == IDLE;
 
 //Address logic
 always_comb begin
@@ -88,19 +86,52 @@ always_comb begin
 end
 
 //Logic to manage the inst output
+logic [15:0] fetch_buffer;
+
 always_ff @(posedge clk) begin
     case (current_state)
         BYTE_1: begin
             //We don't get the first byte until the next clock cycle
         end BYTE_2: begin
-            //Write the first (or only) byte to inst
+            //Write the first (or only) byte to the fetch buffer
             if (pc[0]) begin
-                inst[7:0] <= mem_instr[15:8];
+                fetch_buffer[7:0] <= mem_instr[15:8];
             end else begin
-                inst <= mem_instr;//No chance for misaligned 2-byte instruction
+                fetch_buffer <= mem_instr;//No chance for misaligned 2-byte instruction
             end
         end FINISH: begin
-            inst[15:8] <= mem_instr[7:0];//Get the last byte of a 2 byte instruction
+            fetch_buffer[15:8] <= mem_instr[7:0];//Get the last byte of a 2 byte instruction
+        end
+    endcase
+end
+always_comb begin//Inst multiplexer and fetch complete logic
+    case (current_state)
+        IDLE: begin
+            inst = fetch_buffer;//inst retains the instruction we already fetched
+            fetch_complete = 1;
+        end BYTE_1: begin//Prep to recieve the first byte on the next clock edge
+            inst = 'x;//We're in the middle of fetching an instruction, so inst dosn't matter here
+            fetch_complete = 0;
+        end BYTE_2: begin
+            if (pc[0]) begin
+                if (mem_instr[9]) begin//This is a type 2 or type 3 instruction, so it is 2 bytes
+                    inst = 'x;//We're in the middle of fetching an instruction, so inst dosn't matter here
+                    fetch_complete = 0;
+                end else begin
+                    inst[15:8] = 'x;//This is only a 1 byte instruction, the upper part dosn't matter
+                    inst[7:0] = mem_instr[15:8];//Bypass the fetch buffer to get the instruction out quicker
+                    fetch_complete = 1;
+                end
+            end else begin
+                inst = mem_instr;//Bypass the fetch buffer to get the instruction out quicker
+                fetch_complete = 1;
+            end
+        end FINISH: begin
+            inst = {mem_instr[7:0], fetch_buffer[7:0]};//Bypass the fetch buffer to get the instruction out quicker
+            fetch_complete = 1;
+        end default: begin
+            inst = 'x;
+            fetch_complete = 'x;
         end
     endcase
 end
@@ -114,7 +145,18 @@ always_ff @(posedge clk, posedge rst_async) begin
     if (rst_async) begin
         pc <= 1;
         pc_changed <= '0;
+    end else begin
+
+        if (fetch_operation == cpu_common::FETCH_INC_PC) begin
+            if (inst[1])//Current instruction is 2 bytes
+                pc <= pc + 2;//Skip past both bytes
+            else
+                pc <= pc + 1;//Just skip past the one
+        end
+        //TODO handle other operations
     end
 end
+
+//TODO
 
 endmodule

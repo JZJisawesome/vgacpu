@@ -6,7 +6,7 @@ FILES_TO_INCLUDE="-I ../../src/common.sv -I ../../src/rasterizer.sv -I ../../src
 #Verilate the testbench and vgacpu SystemVerilog files//todo split into multiple commands
 verilator $FILES_TO_INCLUDE --timescale 10ns/10ns -Wall -Wno-fatal -sv -cc verilator.sv --exe --trace-fst -O3 --top-module vgacpu_verilator +1800-2017ext+sv --build verilator.cpp
 #Run the simulation (creates /tmp/vgacpu_verilator.vcd)
-./obj_dir/Vvgacpu_verilator
+(cd ../../ && ./tb/verilator/obj_dir/Vvgacpu_verilator)
 #Open in waveform viewer
 gtkwave /tmp/vgacpu_verilator.vcd
 #Delete files

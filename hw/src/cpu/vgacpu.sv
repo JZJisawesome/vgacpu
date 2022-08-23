@@ -99,7 +99,7 @@ control ctrl (.*);
 //Main memory
 main_mem #(
     .INITIALIZE_FROM_FILE(1),
-    .FILE("test.hex"),
+    .FILE("src/test.hex"),//TESTING
     .FILE_TYPE_BIN(1)
 ) mem (
     .*,

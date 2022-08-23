@@ -1,0 +1,7 @@
+@0
+//Testing 2 1 byte instructions (F1, F0)
+//1111000011110001
+//Testing aligned 2 byte (AAF3)
+//1010101011110011
+//Testing misaligned 2 byte (AAF3)
+1111001100000000 0000000010101010
