@@ -97,7 +97,11 @@ logic [7:0] mem_data_write;
 control ctrl (.*);
 
 //Main memory
-main_mem mem (
+main_mem #(
+    .INITIALIZE_FROM_FILE(1),
+    .FILE("test.hex"),
+    .FILE_TYPE_BIN(1)
+) mem (
     .*,
 
     //We only ever write the lower byte (at least so far)
@@ -127,7 +131,7 @@ agu addr_gen_unit (.*);
 
 //TESTING
 assign gpu_if.command = common::RASTER_CMD_FILL;
-assign gpu_if.colour = 3'b101;
+assign gpu_if.colour = r0;
 assign gpu_if.execute_request = 1;
 //assign gpu_execute_request = 0;
 

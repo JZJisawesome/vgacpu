@@ -29,7 +29,7 @@ module fetch
     input logic [15:0] mem_instr
 );
 
-/* Fetch State Machine */
+/* Fetch Logic/State Machine */
 
 typedef enum {IDLE, BYTE_1, BYTE_2, FINISH} mem_fetch_state_t;
 mem_fetch_state_t current_state;
@@ -38,7 +38,7 @@ mem_fetch_state_t next_state;
 //State transition logic
 always_ff @(posedge clk, posedge rst_async) begin
     if (rst_async)
-        current_state <= IDLE;
+        current_state <= BYTE_1;
     else if (clk)
         current_state <= next_state;
 end
@@ -52,46 +52,55 @@ always_comb begin
             else
                 next_state = IDLE;
         end BYTE_1: begin
-            next_state = IDLE;//TODO
+            next_state = BYTE_2;
         end BYTE_2: begin
-            next_state = IDLE;//TODO
+            if (pc[0]) begin
+                if (mem_instr[9] == 1)//This is a type 2 or type 3 instruction, so it is 2 bytes
+                    next_state = FINISH;//Misaligned, so we need to fetch the 2nd byte
+                else
+                    next_state = IDLE;//Only 1 byte, no need to fetch a second one
+            end else begin
+                next_state = IDLE;//No chance for misaligned 2-byte instruction, so we're done!
+            end
         end FINISH: begin
-            next_state = IDLE;//TODO
+            next_state = IDLE;//This will only take 1 clock cycle
         end
     endcase
 end
 
-//Actual fetch logic based on current state
+assign fetch_complete = current_state == IDLE;
+
+//Address logic
 always_comb begin
     case (current_state)
         IDLE: begin
-            mem_inst_addr = 'x;
-        end
-        BYTE_1: begin
+            mem_inst_addr = 'x;//Don't need to fetch anything while idle
+        end BYTE_1: begin//Prep to recieve the first byte on the next clock edge
             mem_inst_addr = pc[13:1];
-        end
-        BYTE_2: begin
-            mem_inst_addr = 'x;//TODO
-        end
-        FINISH: begin
-            mem_inst_addr = 'x;//TODO
+        end BYTE_2: begin//Prep to fetch the next byte (if it exists and we don't already have it) on the next clock edge
+            mem_inst_addr = pc[13:1] + 1;
+        end FINISH: begin
+            mem_inst_addr = 'x;//No more bytes to fetch
         end default: begin
-            mem_inst_addr = 'x;//TODO
+            mem_inst_addr = 'x;
         end
     endcase
 end
+
+//Logic to manage the inst output
 always_ff @(posedge clk) begin
     case (current_state)
-        IDLE: begin
-        end
         BYTE_1: begin
-        end
-        BYTE_2: begin
-
-        end
-        FINISH: begin
-        end default: begin
-
+            //We don't get the first byte until the next clock cycle
+        end BYTE_2: begin
+            //Write the first (or only) byte to inst
+            if (pc[0]) begin
+                inst[7:0] <= mem_instr[15:8];
+            end else begin
+                inst <= mem_instr;//No chance for misaligned 2-byte instruction
+            end
+        end FINISH: begin
+            inst[15:8] <= mem_instr[7:0];//Get the last byte of a 2 byte instruction
         end
     endcase
 end
@@ -103,7 +112,8 @@ logic [13:0] pc;
 
 always_ff @(posedge clk, posedge rst_async) begin
     if (rst_async) begin
-
+        pc <= 1;
+        pc_changed <= '0;
     end
 end
 

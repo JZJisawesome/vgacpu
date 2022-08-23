@@ -6,8 +6,7 @@
 */
 
 module alu
-    import cpu_common::alu_operation_t;
-    import cpu_common::alu_operand_t;
+    import cpu_common::*;//TODO only import what is needed
 (
     input alu_operation_t alu_operation,
     input alu_operand_t alu_operand,
