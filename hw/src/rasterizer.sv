@@ -5,6 +5,33 @@
  *
 */
 
+interface rasterizer_if;
+    import common::raster_command_t;
+
+    raster_command_t command;
+    logic [7:0] x0, y0, x1, y1;
+    logic [2:0] colour;
+    logic execute_request;//Hold for 1 clock cycle to begin execution; DO NOT ACTIVATE WHILE BUSY
+    logic busy;
+
+    modport gpu (
+        input command,
+        input x0, y0, x1, y1,
+        input colour,
+        input execute_request,
+        output busy
+    );
+
+    modport cpu
+    (
+        output command,
+        output x0, y0, x1, y1,
+        output colour,
+        output execute_request,
+        input busy
+    );
+endinterface
+
 module rasterizer
     import common::raster_command_t;
 (
@@ -14,11 +41,7 @@ module rasterizer
     //TODO interface between CPU and this module
 
     //CPU-GPU Interface
-    input raster_command_t command,
-    input logic [7:0] x0, y0, x1, y1,
-    input logic [2:0] colour,
-    input logic execute_request,//Hold for 1 clock cycle to begin execution; DO NOT ACTIVATE WHILE BUSY
-    output logic busy,
+    rasterizer_if.gpu gpu_if,
 
     //Framebuffer Access
     //We only ever need to write, so we only wire up stuff for that
@@ -28,6 +51,23 @@ module rasterizer
 
     //TODO if multiplication is unavoidable, try to share the multiplier
 );
+
+/* Convinence Interface Reassignments */
+
+raster_command_t command;
+logic [7:0] x0, y0, x1, y1;
+logic [2:0] colour;
+logic execute_request;//Hold for 1 clock cycle to begin execution; DO NOT ACTIVATE WHILE BUSY
+logic busy;
+
+assign command = gpu_if.command;
+assign x0 = gpu_if.x0;
+assign y0 = gpu_if.y0;
+assign x1 = gpu_if.x1;
+assign y1 = gpu_if.y1;
+assign colour = gpu_if.colour;
+assign execute_request = gpu_if.execute_request;
+assign gpu_if.busy = busy;
 
 /* Internal Signals */
 

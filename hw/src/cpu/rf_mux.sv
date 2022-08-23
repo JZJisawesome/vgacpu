@@ -5,9 +5,8 @@
  *
 */
 
-import cpu_common::*;//Man iscarus verilog is pickey about this//TODO only import what is necessary and only in the module scope
-
 module rf_mux
+    import cpu_common::rf_mux_src_t;
 (
     //Mux input selection
     input rf_mux_src_t rf_mux_src,

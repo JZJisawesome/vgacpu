@@ -5,10 +5,9 @@
  *
 */
 
-import cpu_common::*;//FIXME move into module scope and only import needed things
-
 module alu
-    //TODO put imports here
+    import cpu_common::alu_operation_t;
+    import cpu_common::alu_operand_t;
 (
     input alu_operation_t alu_operation,
     input alu_operand_t alu_operand,

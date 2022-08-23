@@ -5,7 +5,9 @@
  *
 */
 
-module fetch (
+module fetch
+    import cpu_common::fetch_operation_t;
+(
     input clk,
     input rst_async,
 

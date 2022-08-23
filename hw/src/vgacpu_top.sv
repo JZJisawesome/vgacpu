@@ -39,12 +39,8 @@ assign clk_50 = clk;
 //Synchronized Buttons
 logic [3:0] buttons_sync;
 
-//CPU-GPU connections
-raster_command_t gpu_command;
-logic [7:0] gpu_x0, gpu_y0, gpu_x1, gpu_y1;
-logic [2:0] gpu_colour;
-logic gpu_execute_request;
-logic gpu_busy;
+//CPU-GPU Interface
+rasterizer_if gpu_if();
 
 //CPU-Sound connections
 logic [25:0] snd_max_count;//Enough bits for frequencies as low as < 1hz
@@ -102,14 +98,7 @@ rasterizer gpu (
     //TODO connections between rasterizer and cpu
 
     //CPU-GPU Interface
-    .command(gpu_command),
-    .x0(gpu_x0),
-    .y0(gpu_y0),
-    .x1(gpu_x1),
-    .y1(gpu_y1),
-    .colour(gpu_colour),
-    .execute_request(gpu_execute_request),
-    .busy(gpu_busy),
+    .gpu_if(gpu_if.gpu),
 
     //Framebuffer Access
     .fb_addr(gpu_fb_addr),
@@ -132,6 +121,6 @@ sound snd (
 buttons synchronizers (.clk(clk_50), .*);
 
 //CPU
-vgacpu cpu (.clk(clk_50), .*);
+vgacpu cpu (.clk(clk_50), .*, .gpu_if(gpu_if.cpu));
 
 endmodule

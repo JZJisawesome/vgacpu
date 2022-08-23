@@ -41,7 +41,7 @@ always_ff @(posedge clk) begin
     counter <= max_count_reached ? '0: (counter + 1);//Count up to max_count_reg inclusive
 
     if (max_count_reached)//Counter is about to flip
-        toggle = ~toggle;//Toggle the buzzer
+        toggle <= ~toggle;//Toggle the buzzer
 end
 
 endmodule

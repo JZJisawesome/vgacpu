@@ -5,9 +5,9 @@
  *
 */
 
-import cpu_common::*;//Man iscarus verilog is pickey about this//TODO only import what is necessary and only in the module scope
-
-module sp (
+module sp
+    import cpu_common::sp_operation_t;
+(
     input clk,
     input rst_async,
 

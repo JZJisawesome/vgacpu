@@ -5,7 +5,9 @@
  *
 */
 
-module control (
+module control
+    import cpu_common::*;
+(
     input logic clk,
     input logic rst_async,
 
@@ -73,32 +75,51 @@ always_comb begin
 end
 
 //Output logic
+//FIXME Iverilog does not require a cast for 'x to an enum
+//Quartus does, but iverilog does not support the case
+//So this really sucks lol
+//I'm beginning to remember why I used verilator before...
+
 always_comb begin
     case (current_state)
         FETCH: begin
             rf_write_en = 0;
-            decode_en = 'x;
-            rf_mux_src = 'x;
+            decode_en = fetch_complete;//Decode the instruction as we make the transition to decode; then from decode we decide what execute state to go to
+            //rf_mux_src = 'x;
+            //sp_operation = 0;
+            fetch_operation = cpu_common::FETCH_NOP;
             //alu_operation = 'x;
             //alu_operand = 'x;
+            pr_write_en = 0;
         end DECODE: begin
             rf_write_en = 0;
-            decode_en = 1;
-            rf_mux_src = 'x;
+            decode_en = 'x;//Already decoded the instruction opon the transition to this state; decoding things again or not won't matter
+            //rf_mux_src = 'x;
+            //sp_operation = 0;
+            fetch_operation = cpu_common::FETCH_NOP;
             //alu_operation = 'x;
             //alu_operand = 'x;
+            pr_write_en = 0;
         end EXECUTE: begin
             rf_write_en = 'x;//TODO
             decode_en = 0;
-            rf_mux_src = 'x;//TODO
+            //rf_mux_src = 'x;//TODO
+            //sp_operation = 'x;//TODO
+            fetch_operation = cpu_common::FETCH_INC_PC;//TODO this must change for branches/jumps/etc
             //alu_operation = //TODO
             //alu_operand = //TODO
+            pr_write_en = 'x;//TODO
         end default: begin
             rf_write_en = 'x;
             decode_en = 'x;
-            rf_mux_src = 'x;//TODO
+            //rf_mux_src = 'x;//TODO
+            //sp_operation = 'x;//TODO
+
+            //fetch_operation = fetch_operation_t'('x);//iverilog dosn't support this
+            fetch_operation = cpu_common::FETCH_NOP;//Not ideal...
             //alu_operation = 'x;
             //alu_operand = 'x;
+            pr_write_en = 'x;
         end
     endcase
 end

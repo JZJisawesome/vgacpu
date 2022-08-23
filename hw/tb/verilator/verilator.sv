@@ -4,13 +4,13 @@
 module vgacpu_verilator (
     input logic clk,
     input logic n_rst_async,
-    input logic [3:0] buttons_async
+    input logic [3:0] buttons_async,
+
+    output logic vga_r, vga_g, vga_b,
+    output vga_hsync, vga_vsync,
+
+    output buzzer
 );
-
-logic vga_r, vga_g, vga_b;
-logic vga_hsync, vga_vsync;
-
-logic buzzer;
 
 vgacpu_top top (.*);
 

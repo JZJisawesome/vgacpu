@@ -5,11 +5,8 @@
  *
 */
 
-import common::raster_command_t;//FIXME move into module scope
-import cpu_common::*;//FIXME move into module scope
-
 module vgacpu
-    //TODO put imports here
+    import cpu_common::*;
 (
     input logic clk,//50MHz
     input logic rst_async,//TODO this async reset should be synchronized!!!
@@ -17,12 +14,8 @@ module vgacpu
     //Button Inputs
     input logic [3:0] buttons_sync,
 
-    //CPU-GPU Interface//TODO turn this into an actual systemverilog interface
-    output raster_command_t gpu_command,
-    output logic [7:0] gpu_x0, gpu_y0, gpu_x1, gpu_y1,
-    output logic [2:0] gpu_colour,
-    output logic gpu_execute_request,//Hold for 1 clock cycle to begin execution; DO NOT ACTIVATE WHILE BUSY
-    input logic gpu_busy,
+    //CPU-GPU Interface
+    rasterizer_if.cpu gpu_if,
 
     //CPU-Sound Interface//TODO turn this into an actual systemverilog interface
     output logic [25:0] snd_max_count,//Enough bits for frequencies as low as < 1hz
@@ -133,9 +126,9 @@ sp stack_pointer (.*);
 agu addr_gen_unit (.*);
 
 //TESTING
-//assign gpu_command = common::RASTER_CMD_FILL;
-//assign gpu_colour = (3'b101;
-//assign gpu_execute_request = 1;
+assign gpu_if.command = common::RASTER_CMD_FILL;
+assign gpu_if.colour = 3'b101;
+assign gpu_if.execute_request = 1;
 //assign gpu_execute_request = 0;
 
 //assign gpu_command = common::RASTER_CMD_POINT;
