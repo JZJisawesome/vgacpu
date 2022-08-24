@@ -22,7 +22,6 @@ module vgacpu
 );
 
 import cpu_common::*;
-//import common::raster_command_t;
 
 /* Control Lines */
 
@@ -58,7 +57,7 @@ logic mem_data_write_en;
 agu_operation_t agu_operation;
 
 //External IO
-//raster_command_t gpu_command;
+common::raster_command_t gpu_command;
 logic gpu_submit;
 
 /* Signals To Control Logic */
@@ -153,6 +152,11 @@ rasterizer_controller gpu_ctrl(.*);
 //assign gpu_if.command = common::RASTER_CMD_FILL;
 //assign gpu_if.colour = r0;
 //assign gpu_if.execute_request = 1;
+
+
+
+
+
 //assign gpu_execute_request = 0;
 
 //assign gpu_command = common::RASTER_CMD_POINT;

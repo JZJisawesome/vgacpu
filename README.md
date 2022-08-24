@@ -76,19 +76,27 @@ May add more instructions (particularly more rendering instructions) in the futu
 
 ##### [11] Other 2-byte
 
-TODO subdivide these instructions better
+###### [111] Rasterizer Commands
+
+[000] | FILL IMM         | Fill the rectangle bounded by the coordinates [x0, y0] and [x1, y1] where the lowest 3 bits of IMM contain the colour
+[001] | POINT IMM        | Plot a point at [x0, y0] in the FB where the lowest 3 bits of IMM contain the colour
+[010] | LINE IMM         | Draw a line between the coordinates [x0, y0] and [x1, y1] where the lowest 3 bits of IMM contain the colour
+
+###### TODO
+
+TODO assign these propertly
 
 [000000] | PAGE IMM         | Set the current data page to the lower 6 bits in IMM
 [000001] | SJUMP IMM        | (Short) Unconditional jump to the address IMM in the current data page
 [000010] | SJLT IMM         | (Short) Conditional jump if r0 < r1 to the address IMM in the current data page
 [000011] | SJEQ IMM         | (Short) Conditional jump if r0 = r1 to the address IMM in the current data page
 [000100] | SJGT IMM         | (Short) Conditional jump if r0 > r1 to the address IMM in the current data page
-[000101] | FILL IMM         | Fill the rectangle bounded by the coordinates [x0, y0] and [x1, y1] where the lowest 3 bits of IMM contain the colour
-[000110] | POINT IMM        | Plot a point at [x0, y0] in the FB where the lowest 3 bits of IMM contain the colour
-[000111] | LINE IMM         | Draw a line between the coordinates [x0, y0] and [x1, y1] where the lowest 3 bits of IMM contain the colour
 [001000] | WAIT IMM         | Wait IMM number of clock cycles
 [001001] | SCALL IMM        | (Short) Unconditional jump to the address contained IMM in the current data page; current address pushed onto stack (2 bytes)
 [001010] | POLLIN IMM       | (Short) Write 1 into r0 if the IMMth input is on, else write 0 (ex. used for getting push button state)s
+
+
+TODO assign SL and SR so that the lowest 3 bits are 000 and 001
 
 [110000] | SL IMM           | Shift bits in r0 left by IMM
 [110001] | SR IMM           | Shift bits in r0 right by IMM

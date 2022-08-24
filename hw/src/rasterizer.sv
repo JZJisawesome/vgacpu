@@ -11,7 +11,7 @@ interface rasterizer_if;
     raster_command_t command;
     logic [7:0] x0, y0, x1, y1;
     logic [2:0] colour;
-    logic execute_request;//Hold for 1 clock cycle to begin execution; DO NOT ACTIVATE WHILE BUSY
+    logic execute_request;//Hold for minimum of 1 clock cycle to begin execution; DO NOT ACTIVATE WHILE BUSY
     logic busy;
 
     modport gpu (

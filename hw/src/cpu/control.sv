@@ -16,6 +16,8 @@ module control
     input logic [2:0] inst_subtype,
     input core_special_operation_t core_special_op,
 
+    input logic gpu_busy,
+
     //Fetch Unit
     input logic fetch_complete,
 
@@ -42,7 +44,7 @@ module control
     output agu_operation_t agu_operation
 );
 
-typedef enum {FETCH, DECODE, EXECUTE} control_state_t;//TODO additional states for different instructions (a single execute state likely won't be enough)
+typedef enum {FETCH, DECODE, EXECUTE, WAIT_RASTERIZER, HALT} control_state_t;//TODO additional states for different instructions (a single execute state likely won't be enough)
 control_state_t current_state;
 control_state_t next_state;
 
@@ -63,17 +65,28 @@ always_comb begin
                 next_state = DECODE;
             else
                 next_state = FETCH;
-        end DECODE: begin//The decode unit always takes exactly 1 clock cycle
-            next_state = EXECUTE;
-        end EXECUTE: begin
-            /*
-            if (inst_type == 2'b01)
-                next_state = FETCH;//All of this class of instructions take only 1 clock cycle
-            else
-                next_state = control_state_t'('x);//TODO number of cycles/the states that occur variy based on the instruction
-            */
-            next_state = FETCH;//TESTING
+        end DECODE: next_state = EXECUTE;//The decode unit always takes exactly 1 clock cycle
+        EXECUTE: begin
+            case (core_special_op)
+                cpu_common::CORE_NOP: begin//Regular instruction
+                    /*
+                    if (inst_type == 2'b01)
+                        next_state = FETCH;//All of this class of instructions take only 1 clock cycle
+                    else
+                        next_state = control_state_t'('x);//TODO number of cycles/the states that occur variy based on the instruction
+                    */
+                    if (inst_type == 2'b11)//TESTING
+                        next_state = gpu_busy ? WAIT_RASTERIZER : FETCH;//TODO do this without blocking
+                    else
+                        next_state = FETCH;
+                end cpu_common::CORE_HALT: next_state = HALT;
+                default: begin
+                    next_state = control_state_t'('x);//TODO implement others
+                end
+            endcase
         end
+        WAIT_RASTERIZER: next_state = gpu_busy ? WAIT_RASTERIZER : FETCH;
+        HALT: next_state = HALT;//Spin forever
     endcase
 end
 
@@ -95,28 +108,24 @@ always_comb begin
         end DECODE: begin
             rf_write_en = 0;
             decode_en = 'x;//Already decoded the instruction opon the transition to this state; decoding things again or not won't matter
-            //rf_mux_src = 'x;
             //sp_operation = 0;
-            fetch_operation = cpu_common::FETCH_NOP;
+            fetch_operation = cpu_common::FETCH_INC_PC;//Speculatively fetch the next instruction//TODO this must change for branches/jumps/etc
             pr_write_en = 0;
             rf_write_en = 0;
         end EXECUTE: begin
             rf_write_en = 'x;//TODO
             decode_en = 0;
-            //rf_mux_src = 'x;//TODO
             //sp_operation = 'x;//TODO
-            fetch_operation = cpu_common::FETCH_INC_PC;//TODO this must change for branches/jumps/etc
+            fetch_operation = cpu_common::FETCH_NOP;//TODO this must change for branches/jumps/etc
             pr_write_en = 'x;//TODO
             //rf_write_en = inst_type == 2'b01;//TODO handle other classes of instrucitons (this is just temporary, only handling some)
             rf_write_en = inst_type == 2'b01 | inst_type == 2'b10;//TESTING
         end default: begin
             rf_write_en = 'x;
             decode_en = 'x;
-            //rf_mux_src = 'x;//TODO
             //sp_operation = 'x;//TODO
 
-            //fetch_operation = fetch_operation_t'('x);//iverilog dosn't support this
-            fetch_operation = cpu_common::FETCH_NOP;//Not ideal...
+            fetch_operation = fetch_operation_t'('x);
             pr_write_en = 'x;
             rf_write_en = 'x;
         end

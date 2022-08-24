@@ -5,10 +5,7 @@
  *
 */
 
-//This is the worst: https://www.intel.ca/content/www/ca/en/support/programmable/articles/000086646.html
-
 module decode
-    //import common::raster_command_t;//TODO fix this (quartus dies on this for whatever reason)
     import cpu_common::*;
 (
     input clk,
@@ -35,10 +32,11 @@ module decode
     output alu_operand_t alu_operand,
 
     //RF Mux
-    output rf_mux_src_t rf_mux_src//,
+    output rf_mux_src_t rf_mux_src,
 
     //External IO
-    //output raster_command_t gpu_command
+    output common::raster_command_t gpu_command,
+    output logic gpu_submit
 );
 
 /* Logic to latch the decoded result */
@@ -59,6 +57,9 @@ alu_operand_t alu_operand_internal;
 //RF Mux
 rf_mux_src_t rf_mux_src_internal;
 
+//External IO
+common::raster_command_t gpu_command_internal;
+
 always_ff @(posedge clk) begin//The decode step takes 1 clock cycle
     if (decode_en) begin
         immediate <= immediate_internal;
@@ -70,6 +71,7 @@ always_ff @(posedge clk) begin//The decode step takes 1 clock cycle
         alu_operand <= alu_operand_internal;
         rf_mux_src <= rf_mux_src_internal;
         core_special_op <= core_special_op_internal;
+        gpu_command <= gpu_command_internal;
     end
 end
 
@@ -158,8 +160,19 @@ always_comb begin
             default: core_special_op_internal = core_special_operation_t'('x);
         endcase
     end else
-        core_special_op_internal = cpu_common::CORE_REGULAR;
+        core_special_op_internal = cpu_common::CORE_NOP;
 end
+
+//Rasterizer Command Decoder
+always_comb begin//Assume inst_type is 2'b11 and inst_subtype is 3'b111
+    case (inst[7:5])
+        3'b000: gpu_command_internal = common::RASTER_CMD_FILL;
+        3'b001: gpu_command_internal = common::RASTER_CMD_POINT;
+        3'b010: gpu_command_internal = common::RASTER_CMD_LINE;
+        default: gpu_command_internal = common::raster_command_t'('x);
+    endcase
+end
+assign gpu_submit = (inst_type_internal == 2'b11) & (inst_subtype_internal == 3'b111);//Only actually submit a command in this case//TODO may need to be smarter about this
 
 //Decoder just for synthesis
 //TODO use enum to get nice output, but keep disconnected from everything else so it is optimized away

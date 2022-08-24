@@ -11,5 +11,10 @@
 //Actual Instructions
 //lim r0, 0b101
 0000010100000010
-//add r0 followed by null byte
-0000000000001001
+//add r0 twice
+//0000100100001001
+//point 2 followed by fill 5
+//0000001000111111
+//0000010100011111
+//Halt instructions at the end to get things to stop
+0011110000111100
