@@ -17,3 +17,4 @@ hw/*.qws
 
 #Other things
 *.kate-swp
+*.autosave.xopp

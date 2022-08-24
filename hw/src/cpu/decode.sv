@@ -5,7 +5,10 @@
  *
 */
 
+//This is the worst: https://www.intel.ca/content/www/ca/en/support/programmable/articles/000086646.html
+
 module decode
+    //import common::raster_command_t;//TODO fix this (quartus dies on this for whatever reason)
     import cpu_common::*;
 (
     input clk,
@@ -32,9 +35,10 @@ module decode
     output alu_operand_t alu_operand,
 
     //RF Mux
-    output rf_mux_src_t rf_mux_src
+    output rf_mux_src_t rf_mux_src//,
 
-    //TODO signals to control logic
+    //External IO
+    //output raster_command_t gpu_command
 );
 
 /* Logic to latch the decoded result */

@@ -6,7 +6,6 @@
 */
 
 module vgacpu
-    import cpu_common::*;
 (
     input logic clk,//50MHz
     input logic rst_async,//TODO this async reset should be synchronized!!!
@@ -21,6 +20,9 @@ module vgacpu
     output logic [25:0] snd_max_count,//Enough bits for frequencies as low as < 1hz
     output logic snd_latch_max_count//Hold for 1 clock cycle to latch the new max count
 );
+
+import cpu_common::*;
+//import common::raster_command_t;
 
 /* Control Lines */
 
@@ -55,10 +57,17 @@ logic mem_data_write_en;
 //AGU
 agu_operation_t agu_operation;
 
+//External IO
+//raster_command_t gpu_command;
+logic gpu_submit;
+
 /* Signals To Control Logic */
 
 //Fetch Unit
 logic fetch_complete;
+
+//External IO
+logic gpu_busy;
 
 /* Data Connections */
 
@@ -133,14 +142,17 @@ sp stack_pointer (.*);
 //AGU
 agu addr_gen_unit (.*);
 
+//GPU controller
+rasterizer_controller gpu_ctrl(.*);
+
 /* Simple connections to external modules */
 
 //assign snd_max_count = {3'b0, r5, r4, 7'b0};//Balance between granularity and minimum frequency
 
 //TESTING
-assign gpu_if.command = common::RASTER_CMD_FILL;
-assign gpu_if.colour = r0;
-assign gpu_if.execute_request = 1;
+//assign gpu_if.command = common::RASTER_CMD_FILL;
+//assign gpu_if.colour = r0;
+//assign gpu_if.execute_request = 1;
 //assign gpu_execute_request = 0;
 
 //assign gpu_command = common::RASTER_CMD_POINT;
