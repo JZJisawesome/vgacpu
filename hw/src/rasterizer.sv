@@ -52,6 +52,8 @@ module rasterizer
     //TODO if multiplication is unavoidable, try to share the multiplier
 );
 
+//TODO create a fifo for this to queue multiple raster commands and only set the busy flag when the fifo is full
+
 /* Convinence Interface Reassignments */
 
 raster_command_t command;
