@@ -160,6 +160,72 @@ TODO swap push and pop with 0TOX and XTO0???
 
 ## Implementation Brainstorming/Details
 
+## Instruction Cycle
+
+### Old
+
+TODO rename FETCH to FETCH_DECODE since we can only transition between states on the positive edge but don't know the fetch is done until the posedge too. Also rename DECODE to EXECUTE
+
+After reset, control is in the FETCH state and the fetch unit is in the BYTE_1_PREP state.
+
+Posedge 1:
+    When the first posedge occurs, the first word of memory is fetched into the memory's output registers,
+    and the fetch unit transitions to BYTE_2_PREP_BYTE_1_FINISH. Control's state is still FETCH since it does not
+    yet know the fetch is complete
+
+In Between:
+    Combinational logic in the fetch unit indicates that the instruction fetch is finished, and bypasses the
+    fetch buffer to connect the memory's output register to the instruction output of the fetch unit.
+    Since the instruction fetch is finished, the decoder is enabled and combinationally decodes the instruction now.
+
+Posedge 2:
+    The memory's output is latched into the fetch buffer, and the decoder's result is latched into it's output.
+    Now the control logic sees that the FETCH has finished, and transitions to DECODE.
+
+In Between:
+    Using the decoded result, the instruction is mostly executed, but since the control logic is still in DECODE, not everything is completed.
+    Also the instruction output of the fetch unit switches to outputting the contents of the fetch buffer instead of bypassing it.
+
+Posedge 3: The control logic transitions to EXECUTE. Some things were latched due to decode's signals now, but not everything
+
+In Between: Nothing really happens
+
+Posedge 4: Things that depended on the control being in EXECUTE occur now.
+
+In between: Transition to fetch
+
+Posedge 5: ???
+
+### New
+
+After reset, control is in the FETCH_DECODE state and the fetch unit is in the BYTE_1_PREP state.
+In this state, the initial addresses are configured for the memory so that when the first posedge arrives,
+the first instruction can be fetched.
+
+Posedge 1:
+    When the first posedge occurs, the first word of memory is fetched into the memory's output registers,
+    and the fetch unit transitions to BYTE_2_PREP_BYTE_1_FINISH. Control's state is still FETCH_DECODE since it does not
+    yet know the fetch is complete (and the decode step isn't complete yet anyways).
+
+In Between:
+    Combinational logic in the fetch unit indicates that the instruction fetch is finished, and bypasses the
+    fetch buffer to connect the memory's output register to the instruction output of the fetch unit.
+    Since the instruction fetch is finished, the decoder is enabled and combinationally decodes the instruction now.
+
+Posedge 2:
+    The memory's output is latched into the fetch buffer, and the decoder's result is latched into its output.
+    Now the control logic sees that the fetch has finished, and transitions to EXECUTE. This is okay since the decode step
+    always takes exactly one clock cycle, so even though the control logic only sees the fetch finished 1 clock cycle later,
+    during that time decode has also finished. So it is safe to jump right to EXECUTE.
+
+In Between:
+    The instruction is executed.
+    We also increment the PC on this step. TODO could we do this during the second clock cycle of FETCH_DECODE so we save a cycle on the next instruction? (depending on the instruction). Then we change the address properly if it turns out the instruction would change the PC during execute?
+
+NOTE: EXECUTE may last several clock cycles depending on the instruction. Regardless, by the end, the PC should we setup and (potentially) the next instruction already fetched on or before "Posedge 3"
+
+Posedge 3: Control transitions to FETCH_DECODE, seeing a changed PC, the fetch unit transitions to BYTE_1_PREP, and the cycle repeats.
+
 ### Control Signals For Modules
 
 #### Register File
