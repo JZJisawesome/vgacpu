@@ -31,9 +31,6 @@ module fetch
 
 /* Fetch Logic/State Machine */
 
-logic pc_will_change;
-assign pc_will_change = fetch_operation != cpu_common::FETCH_NOP;
-
 typedef enum {IDLE, BYTE_1_PREP, BYTE_2_PREP_BYTE_1_FINISH, BYTE_2_FINISH} mem_fetch_state_t;
 mem_fetch_state_t current_state;
 mem_fetch_state_t next_state;
@@ -153,6 +150,13 @@ end
 /* PC Logic */
 
 logic [13:0] pc;
+
+logic pc_will_change;
+
+//TODO this assumes changing the PC will only take one clock cycle; depending on the fetch_operation it may take longer
+//We'll need to have more complicated logic here then
+//This should go low at the same time the new pc is latched for best fetch performance, though it can go low after later and still preserve the proper behaviour
+assign pc_will_change = fetch_operation != cpu_common::FETCH_NOP;
 
 always_ff @(posedge clk, posedge rst_async) begin
     if (rst_async) begin

@@ -78,9 +78,10 @@ May add more instructions (particularly more rendering instructions) in the futu
 
 ###### [111] Rasterizer Commands
 
-[000] | FILL IMM         | Fill the rectangle bounded by the coordinates [x0, y0] and [x1, y1] where the lowest 3 bits of IMM contain the colour
+[000] | FILL IMM         | Fill the entire screen where the lowest 3 bits of IMM contain the colour
 [001] | POINT IMM        | Plot a point at [x0, y0] in the FB where the lowest 3 bits of IMM contain the colour
 [010] | LINE IMM         | Draw a line between the coordinates [x0, y0] and [x1, y1] where the lowest 3 bits of IMM contain the colour
+[011] | RECT IMM         | Fill the rectangle bounded by the coordinates [x0, y0] and [x1, y1] where the lowest 3 bits of IMM contain the colour
 
 ###### TODO
 

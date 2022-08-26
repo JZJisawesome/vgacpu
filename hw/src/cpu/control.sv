@@ -99,12 +99,12 @@ end
 always_comb begin
     case (current_state)
         FETCH_DECODE: begin
-            decode_en = fetch_complete;//Decode the instruction as we make the transition to decode; then from decode we decide what execute state to go to
+            decode_en = fetch_complete;//Decode the instruction as we make the transition to execute, and speculatively increment the PC
             //sp_operation = 0;
             fetch_operation = fetch_complete ? cpu_common::FETCH_INC_PC : cpu_common::FETCH_NOP;//Speculatively increment the pc while we decode the current instruction
             pr_write_en = 0;
             rf_write_en = 0;
-        end EXECUTE: begin
+        end EXECUTE, WAIT_RASTERIZER: begin//TODO WAIT_RASTERIZER may need to be seperate from EXECUTE
             decode_en = 0;
             //sp_operation = 'x;//TODO
             fetch_operation = cpu_common::FETCH_NOP;//TODO this must change for branches/jumps/etc

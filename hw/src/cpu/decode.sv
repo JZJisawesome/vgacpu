@@ -59,6 +59,7 @@ rf_mux_src_t rf_mux_src_internal;
 
 //External IO
 common::raster_command_t gpu_command_internal;
+logic gpu_submit_internal;
 
 always_ff @(posedge clk) begin//The decode step takes 1 clock cycle
     if (decode_en) begin
@@ -72,6 +73,7 @@ always_ff @(posedge clk) begin//The decode step takes 1 clock cycle
         rf_mux_src <= rf_mux_src_internal;
         core_special_op <= core_special_op_internal;
         gpu_command <= gpu_command_internal;
+        gpu_submit <= gpu_submit_internal;
     end
 end
 
@@ -169,10 +171,16 @@ always_comb begin//Assume inst_type is 2'b11 and inst_subtype is 3'b111
         3'b000: gpu_command_internal = common::RASTER_CMD_FILL;
         3'b001: gpu_command_internal = common::RASTER_CMD_POINT;
         3'b010: gpu_command_internal = common::RASTER_CMD_LINE;
+        3'b011: gpu_command_internal = common::RASTER_CMD_RECT;
         default: gpu_command_internal = common::raster_command_t'('x);
     endcase
 end
-assign gpu_submit = (inst_type_internal == 2'b11) & (inst_subtype_internal == 3'b111);//Only actually submit a command in this case//TODO may need to be smarter about this
+
+//Only actually submit a command in this case;
+//Note that we don't have to wait for the rasterizer to no longer be busy since the submission dosn't actually go through until it isn't any more
+//and the control logic waits until that is the case
+assign gpu_submit_internal = (inst_type_internal == 2'b11) & (inst_subtype_internal == 3'b111);
+
 
 //Decoder just for synthesis
 //TODO use enum to get nice output, but keep disconnected from everything else so it is optimized away
