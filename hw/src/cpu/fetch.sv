@@ -31,6 +31,9 @@ module fetch
 
 /* Fetch Logic/State Machine */
 
+//Note this is not ideal: we always must transition to idle after a full complete instruction fetch, which wastes a cycle...
+//TODO improve that in the future (do the instruction fetch in idle (call it IDLE_AND_BYTE_1_PREP like FETCH_DECODE))
+
 typedef enum {IDLE, BYTE_1_PREP, BYTE_2_PREP_BYTE_1_FINISH, BYTE_2_FINISH} mem_fetch_state_t;
 mem_fetch_state_t current_state;
 mem_fetch_state_t next_state;
@@ -47,23 +50,34 @@ end
 always_comb begin
     case (current_state)
         IDLE: begin
+            //Stay in idle until the pc changes
             if (pc_changed)
                 next_state = BYTE_1_PREP;
             else
                 next_state = IDLE;
         end BYTE_1_PREP: begin
-            next_state = BYTE_2_PREP_BYTE_1_FINISH;
+            if (pc_changed)//Must wait until the desired PC is known
+                next_state = BYTE_1_PREP;
+            else//After pc_changes goes low, it takes 1 clock cycle to perform the first step
+                next_state = BYTE_2_PREP_BYTE_1_FINISH;
         end BYTE_2_PREP_BYTE_1_FINISH: begin
-            if (pc[0]) begin
-                if (mem_instr[9])//This is a type 2 or type 3 instruction, so it is 2 bytes
-                    next_state = BYTE_2_FINISH;//Misaligned, so we need to fetch the 2nd byte
-                else
-                    next_state = IDLE;//Only 1 byte, no need to fetch a second one
-            end else begin
-                next_state = IDLE;//No chance for misaligned 2-byte instruction, so we're done!
+            if (pc_changed)//Must restart the fetch sequence if the PC changes before we're finished
+                next_state = BYTE_1_PREP;
+            else begin//Otherwise the sequence only takes 1 clock cycle
+                if (pc[0]) begin
+                    if (mem_instr[9])//This is a type 2 or type 3 instruction, so it is 2 bytes
+                        next_state = BYTE_2_FINISH;//Misaligned, so we need to fetch the 2nd byte
+                    else
+                        next_state = IDLE;//Only 1 byte, no need to fetch a second one
+                end else begin
+                    next_state = IDLE;//No chance for misaligned 2-byte instruction, so we're done!
+                end
             end
         end BYTE_2_FINISH: begin
-            next_state = IDLE;//This will only take 1 clock cycle
+            if (pc_changed)//Must restart the fetch sequence if the PC changes before we're finished
+                next_state = BYTE_1_PREP;
+            else
+                next_state = IDLE;//This will only take 1 clock cycle, so go to idle right after this
         end
     endcase
 end
@@ -137,6 +151,9 @@ always_comb begin//Inst multiplexer and fetch complete logic
 end
 
 /* PC Logic */
+
+//TODO bypass the PC with the new PC to fetch the next instruction faster
+//Then again the delay through the memory is already long enough... probably not a good idea
 
 logic pc_changed;//Used by fetch logic to fetch a new instruction when the pc changes
 logic [13:0] pc;

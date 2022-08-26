@@ -3,6 +3,8 @@
  *
  * Control logic for cpu (mealey machine)
  *
+ * See theory of operation in readme
+ *
 */
 
 module control
@@ -44,29 +46,27 @@ module control
     output agu_operation_t agu_operation
 );
 
-typedef enum {FETCH, DECODE, EXECUTE, WAIT_RASTERIZER, HALT} control_state_t;//TODO additional states for different instructions (a single execute state likely won't be enough)
+typedef enum {FETCH_DECODE, EXECUTE, WAIT_RASTERIZER, HALT} control_state_t;//TODO additional states for different instructions (a single execute state likely won't be enough)
 control_state_t current_state;
 control_state_t next_state;
 
 //State transition logic
 always_ff @(posedge clk, posedge rst_async) begin
     if (rst_async)
-        current_state <= FETCH;
+        current_state <= FETCH_DECODE;
     else if (clk)
         current_state <= next_state;
 end
 
 //Next state logic
 always_comb begin
-    //TODO actually transition based on signals and not just in a fixed loop
     case (current_state)
-        FETCH: begin
+        FETCH_DECODE: begin
             if (fetch_complete)
-                next_state = DECODE;
+                next_state = EXECUTE;
             else
-                next_state = FETCH;
-        end DECODE: next_state = EXECUTE;//The decode unit always takes exactly 1 clock cycle
-        EXECUTE: begin
+                next_state = FETCH_DECODE;
+        end EXECUTE: begin
             case (core_special_op)
                 cpu_common::CORE_NOP: begin//Regular instruction
                     /*
@@ -76,16 +76,16 @@ always_comb begin
                         next_state = control_state_t'('x);//TODO number of cycles/the states that occur variy based on the instruction
                     */
                     if (inst_type == 2'b11)//TESTING
-                        next_state = gpu_busy ? WAIT_RASTERIZER : FETCH;//TODO do this without blocking
+                        next_state = gpu_busy ? WAIT_RASTERIZER : FETCH_DECODE;//TODO do this without blocking
                     else
-                        next_state = FETCH;
+                        next_state = FETCH_DECODE;
                 end cpu_common::CORE_HALT: next_state = HALT;
                 default: begin
                     next_state = control_state_t'('x);//TODO implement others
                 end
             endcase
         end
-        WAIT_RASTERIZER: next_state = gpu_busy ? WAIT_RASTERIZER : FETCH;
+        WAIT_RASTERIZER: next_state = gpu_busy ? WAIT_RASTERIZER : FETCH_DECODE;
         HALT: next_state = HALT;//Spin forever
     endcase
 end
@@ -98,30 +98,26 @@ end
 
 always_comb begin
     case (current_state)
-        FETCH: begin
-            rf_write_en = 0;
+        FETCH_DECODE: begin
             decode_en = fetch_complete;//Decode the instruction as we make the transition to decode; then from decode we decide what execute state to go to
             //sp_operation = 0;
-            fetch_operation = cpu_common::FETCH_NOP;
-            pr_write_en = 0;
-            rf_write_en = 0;
-        end DECODE: begin
-            rf_write_en = 0;
-            decode_en = 'x;//Already decoded the instruction opon the transition to this state; decoding things again or not won't matter
-            //sp_operation = 0;
-            fetch_operation = cpu_common::FETCH_INC_PC;//Speculatively fetch the next instruction//TODO this must change for branches/jumps/etc
+            fetch_operation = fetch_complete ? cpu_common::FETCH_INC_PC : cpu_common::FETCH_NOP;//Speculatively increment the pc while we decode the current instruction
             pr_write_en = 0;
             rf_write_en = 0;
         end EXECUTE: begin
-            rf_write_en = 'x;//TODO
             decode_en = 0;
             //sp_operation = 'x;//TODO
             fetch_operation = cpu_common::FETCH_NOP;//TODO this must change for branches/jumps/etc
             pr_write_en = 'x;//TODO
             //rf_write_en = inst_type == 2'b01;//TODO handle other classes of instrucitons (this is just temporary, only handling some)
             rf_write_en = inst_type == 2'b01 | inst_type == 2'b10;//TESTING
+        end HALT: begin//Do nothing forever
+            decode_en = 0;
+            //sp_operation = 0;
+            fetch_operation = cpu_common::FETCH_NOP;
+            pr_write_en = 0;
+            rf_write_en = 0;
         end default: begin
-            rf_write_en = 'x;
             decode_en = 'x;
             //sp_operation = 'x;//TODO
 
